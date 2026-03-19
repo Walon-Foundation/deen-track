@@ -30,3 +30,20 @@ export const journalEntrySchema = z.object({
   title: z.string().nullable().optional(),
   content: z.string().min(1, "Content is required"),
 });
+
+export const prayerEntrySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+  fajr: z.enum(["Missed", "Alone", "Jamat"]),
+  dhuhr: z.enum(["Missed", "Alone", "Jamat"]),
+  asr: z.enum(["Missed", "Alone", "Jamat"]),
+  maghrib: z.enum(["Missed", "Alone", "Jamat"]),
+  isha: z.enum(["Missed", "Alone", "Jamat"]),
+  sunnahFajr: z.boolean().default(false),
+  sunnahDhuhr: z.boolean().default(false),
+  sunnahAsr: z.boolean().default(false),
+  sunnahMaghrib: z.boolean().default(false),
+  sunnahIsha: z.boolean().default(false),
+  witr: z.boolean().default(false),
+  tahajjud: z.boolean().default(false),
+  naflCount: z.coerce.number().int().nonnegative().default(0),
+});

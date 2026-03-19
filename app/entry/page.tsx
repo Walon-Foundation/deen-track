@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sunrise, Sun, CloudSun, Sunset, Moon, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -150,7 +150,7 @@ const HADITH_COLLECTIONS: Record<string, number> = {
   Other: 100,
 };
 
-type EntryCategory = "Quran" | "Hadith" | "Dua" | "Knowledge";
+type EntryCategory = "Quran" | "Hadith" | "Dua" | "Knowledge" | "Salah";
 
 export default function EntryPage() {
   const router = useRouter();
@@ -182,6 +182,57 @@ export default function EntryPage() {
   // Journal States
   const [journalTitle, setJournalTitle] = useState<string>("");
   const [journalContent, setJournalContent] = useState<string>("");
+
+  // Salah States
+  const [fajrStatus, setFajrStatus] = useState<string>("Alone");
+  const [dhuhrStatus, setDhuhrStatus] = useState<string>("Alone");
+  const [asrStatus, setAsrStatus] = useState<string>("Alone");
+  const [maghribStatus, setMaghribStatus] = useState<string>("Alone");
+  const [ishaStatus, setIshaStatus] = useState<string>("Alone");
+  const [sunnahFajr, setSunnahFajr] = useState<boolean>(false);
+  const [sunnahDhuhr, setSunnahDhuhr] = useState<boolean>(false);
+  const [sunnahAsr, setSunnahAsr] = useState<boolean>(false);
+  const [sunnahMaghrib, setSunnahMaghrib] = useState<boolean>(false);
+  const [sunnahIsha, setSunnahIsha] = useState<boolean>(false);
+  const [witrPrayed, setWitrPrayed] = useState<boolean>(false);
+  const [tahajjudPrayed, setTahajjudPrayed] = useState<boolean>(false);
+  const [naflUnits, setNaflUnits] = useState<number>(0);
+
+  // Persistence Engine: Daily Draft
+  const getTodayKey = () => `salah_draft_${new Date().toISOString().split('T')[0]}`;
+
+  useEffect(() => {
+    const draft = localStorage.getItem(getTodayKey());
+    if (draft) {
+      try {
+        const data = JSON.parse(draft);
+        setFajrStatus(data.fajrStatus || "Alone");
+        setDhuhrStatus(data.dhuhrStatus || "Alone");
+        setAsrStatus(data.asrStatus || "Alone");
+        setMaghribStatus(data.maghribStatus || "Alone");
+        setIshaStatus(data.ishaStatus || "Alone");
+        setSunnahFajr(data.sunnahFajr || false);
+        setSunnahDhuhr(data.sunnahDhuhr || false);
+        setSunnahAsr(data.sunnahAsr || false);
+        setSunnahMaghrib(data.sunnahMaghrib || false);
+        setSunnahIsha(data.sunnahIsha || false);
+        setWitrPrayed(data.witrPrayed || false);
+        setTahajjudPrayed(data.tahajjudPrayed || false);
+        setNaflUnits(data.naflUnits || 0);
+      } catch (e) { console.error("Draft error", e); }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (entryCategory === "Salah") {
+      const state = {
+        fajrStatus, dhuhrStatus, asrStatus, maghribStatus, ishaStatus,
+        sunnahFajr, sunnahDhuhr, sunnahAsr, sunnahMaghrib, sunnahIsha,
+        witrPrayed, tahajjudPrayed, naflUnits
+      };
+      localStorage.setItem(getTodayKey(), JSON.stringify(state));
+    }
+  }, [fajrStatus, dhuhrStatus, asrStatus, maghribStatus, ishaStatus, sunnahFajr, sunnahDhuhr, sunnahAsr, sunnahMaghrib, sunnahIsha, witrPrayed, tahajjudPrayed, naflUnits, entryCategory]);
 
   const selectedSurahInfo = SURAHS.find((s) => s.name === quranSurahName);
   const verseCountArray = selectedSurahInfo
@@ -215,6 +266,24 @@ export default function EntryPage() {
       } else if (entryCategory === "Knowledge") {
         endpoint = "/api/entry/knowledge";
         payload = { knowledgeType, title: knowledgeTitle, notes: knowledgeNotes };
+      } else if (entryCategory === "Salah") {
+        endpoint = "/api/entry/prayer";
+        payload = { 
+          date: new Date().toISOString().split('T')[0],
+          fajr: fajrStatus, 
+          dhuhr: dhuhrStatus, 
+          asr: asrStatus, 
+          maghrib: maghribStatus, 
+          isha: ishaStatus, 
+          sunnahFajr,
+          sunnahDhuhr,
+          sunnahAsr,
+          sunnahMaghrib,
+          sunnahIsha,
+          witr: witrPrayed,
+          tahajjud: tahajjudPrayed, 
+          naflCount: naflUnits 
+        };
       }
 
       const res = await fetch(endpoint, {
@@ -267,6 +336,7 @@ export default function EntryPage() {
     { id: "Hadith", label: "Hadith" },
     { id: "Dua", label: "Dua" },
     { id: "Knowledge", label: "Islamic History" },
+    { id: "Salah", label: "Salah Hub" },
   ];
 
   return (
@@ -711,6 +781,131 @@ export default function EntryPage() {
                             className="min-h-[120px] bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base resize-y shadow-sm"
                           />
                         </div>
+                      </motion.div>
+                    )}
+
+                    {/* SALAH */}
+                    {entryCategory === "Salah" && (
+                      <motion.div
+                        key="salah"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="space-y-10 max-w-7xl mx-auto px-4 sm:px-0"
+                      >
+                         {/* Next Prayer Hint / Header Area */}
+                         <div className="bg-slate-900 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-2xl shadow-slate-900/20">
+                            <div className="relative z-10 flex items-center justify-between">
+                               <div>
+                                  <p className="text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] mb-2">Protocol Status</p>
+                                  <h3 className="text-white text-2xl font-black tracking-tighter">Salaamu Alaikum.</h3>
+                                  <p className="text-slate-400 text-xs font-bold mt-1">Consistency build spiritual trajectory.</p>
+                               </div>
+                               <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md">
+                                  <Sparkles className="w-6 h-6 text-sky-500 animate-pulse" />
+                               </div>
+                            </div>
+                            <div className="absolute top-[-50%] right-[-10%] w-48 h-48 bg-sky-500/10 rounded-full blur-[60px] pointer-events-none" />
+                         </div>
+
+                         {/* Prayer Card Grid - Horizontal Scroll on Mobile, Grid on Tablet/Desktop */}
+                         <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                               <Label className="text-slate-700 font-black uppercase tracking-widest text-[10px]">Daily Prayer Tracker</Label>
+                               <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100/50">
+                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                 <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Draft Synchronized</span>
+                               </div>
+                            </div>
+
+                            <div className="flex overflow-x-auto pb-6 gap-4 no-scrollbar -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-5 lg:gap-6">
+                               {[
+                                 { id: 'fajr', label: 'Fajr', time: '5:12 AM', state: fajrStatus, set: setFajrStatus, sunnah: sunnahFajr, setSunnah: setSunnahFajr, icon: <Moon className="w-5 h-5" />, bg: "bg-sky-50", text: "text-sky-600", border: "border-sky-100" },
+                                 { id: 'dhuhr', label: 'Dhuhr', time: '12:45 PM', state: dhuhrStatus, set: setDhuhrStatus, sunnah: sunnahDhuhr, setSunnah: setSunnahDhuhr, icon: <Sun className="w-5 h-5" />, bg: "bg-teal-50", text: "text-teal-600", border: "border-teal-100" },
+                                 { id: 'asr', label: 'Asr', time: '3:55 PM', state: asrStatus, set: setAsrStatus, sunnah: sunnahAsr, setSunnah: setSunnahAsr, icon: <CloudSun className="w-5 h-5" />, bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100" },
+                                 { id: 'maghrib', label: 'Maghrib', time: '6:08 PM', state: maghribStatus, set: setMaghribStatus, sunnah: sunnahMaghrib, setSunnah: setSunnahMaghrib, icon: <Sunset className="w-5 h-5" />, bg: "bg-rose-50", text: "text-rose-600", border: "border-rose-100" },
+                                 { id: 'isha', label: 'Isha', time: '7:30 PM', state: ishaStatus, set: setIshaStatus, sunnah: sunnahIsha, setSunnah: setSunnahIsha, icon: <Moon className="w-5 h-5" />, bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100" },
+                               ].map((p) => (
+                                 <div key={p.id} className={`min-w-[160px] flex-shrink-0 p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500 group relative overflow-hidden ${p.state !== 'Missed' ? 'border-sky-100' : ''}`}>
+                                    <div className="flex flex-col items-center text-center relative z-10">
+                                       <div className={`w-14 h-14 rounded-2xl ${p.bg} flex items-center justify-center ${p.text} mb-4 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6`}>
+                                          {p.icon}
+                                       </div>
+                                       <h4 className="font-black text-slate-900 tracking-tight text-lg mb-1">{p.label}</h4>
+                                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">{p.time}</p>
+
+                                       <div className="flex flex-col gap-2 w-full">
+                                          {['Missed', 'Alone', 'Jamat'].map((status) => (
+                                            <button
+                                              key={status}
+                                              type="button"
+                                              onClick={() => p.set(status)}
+                                              className={`w-full py-2 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${p.state === status ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-400 bg-slate-50 hover:bg-slate-100"}`}
+                                            >
+                                              {status}
+                                            </button>
+                                          ))}
+                                       </div>
+
+                                       <button 
+                                          type="button"
+                                          onClick={() => p.setSunnah(!p.sunnah)}
+                                          className={`mt-4 w-full h-8 rounded-full border transition-all flex items-center justify-center gap-2 ${p.sunnah ? "bg-emerald-500 text-white border-transparent" : "bg-white border-slate-100 text-slate-300 hover:text-emerald-500 hover:border-emerald-100"}`}
+                                       >
+                                          <Sparkles className={`w-3 h-3 ${p.sunnah ? "fill-white" : ""}`} />
+                                          <span className="text-[8px] font-black uppercase tracking-[0.2em]">Sunnah</span>
+                                       </button>
+                                    </div>
+                                    <div className={`absolute top-0 right-0 w-20 h-20 ${p.bg} rounded-full blur-[30px] -mr-10 -mt-10 opacity-40 group-hover:opacity-100 transition-opacity`} />
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+
+                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+                             {/* Witr */}
+                             <div 
+                               className={`p-4 rounded-[2rem] border transition-all flex flex-col justify-between cursor-pointer group ${witrPrayed ? "bg-sky-500 border-sky-400" : "bg-white border-slate-200 hover:border-sky-200"}`}
+                               onClick={() => setWitrPrayed(!witrPrayed)}
+                             >
+                                <div className="flex items-center justify-between mb-6">
+                                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${witrPrayed ? "bg-white/20 text-white" : "bg-slate-50 text-slate-400 group-hover:text-sky-500"}`}>
+                                      <Moon className="w-4 h-4" />
+                                   </div>
+                                   <div className={`w-6 h-3 rounded-full border relative transition-all ${witrPrayed ? "bg-white border-white/20" : "bg-slate-100 border-slate-200"}`}>
+                                      <div className={`absolute top-0.5 w-1.5 h-1.5 rounded-full transition-all ${witrPrayed ? "right-0.5 bg-sky-500" : "left-0.5 bg-slate-300"}`} />
+                                   </div>
+                                </div>
+                                <span className={`text-[9px] font-black uppercase tracking-widest leading-none ${witrPrayed ? "text-white/70" : "text-slate-400"}`}>Closing</span>
+                                <h4 className={`text-sm font-black tracking-tight ${witrPrayed ? "text-white" : "text-slate-900"}`}>Witr Prayer.</h4>
+                             </div>
+
+                             {/* Tahajjud */}
+                             <div 
+                               className={`p-4 rounded-[2rem] border transition-all flex flex-col justify-between cursor-pointer group ${tahajjudPrayed ? "bg-slate-900 border-slate-800 shadow-xl shadow-slate-900/10" : "bg-white border-slate-200 hover:border-indigo-200"}`}
+                               onClick={() => setTahajjudPrayed(!tahajjudPrayed)}
+                             >
+                                <div className="flex items-center justify-between mb-6">
+                                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${tahajjudPrayed ? "bg-indigo-500 text-white" : "bg-slate-50 text-slate-400 group-hover:text-indigo-500"}`}>
+                                      <Sparkles className="w-4 h-4" />
+                                   </div>
+                                </div>
+                                <span className={`text-[9px] font-black uppercase tracking-widest leading-none ${tahajjudPrayed ? "text-slate-500" : "text-slate-400"}`}>Nightly</span>
+                                <h4 className={`text-sm font-black tracking-tight ${tahajjudPrayed ? "text-white" : "text-slate-900"}`}>Tahajjud.</h4>
+                             </div>
+
+                             {/* Nafl Units */}
+                             <div className="p-4 bg-white border border-slate-200 rounded-[2rem] flex flex-col justify-between group hover:border-amber-200 lg:col-span-1 col-span-2">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Extra Nafl</span>
+                                <div className="flex items-center justify-between">
+                                   <span className="text-2xl font-black text-slate-900 leading-none">{naflUnits}</span>
+                                   <div className="flex gap-1">
+                                      <button type="button" onClick={() => setNaflUnits(Math.max(0, naflUnits - 2))} className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">-</button>
+                                      <button type="button" onClick={() => setNaflUnits(naflUnits + 2)} className="w-7 h-7 rounded-lg bg-amber-400 text-white shadow-lg shadow-amber-400/20 flex items-center justify-center hover:scale-105 active:scale-95 font-bold">+</button>
+                                   </div>
+                                </div>
+                             </div>
+                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

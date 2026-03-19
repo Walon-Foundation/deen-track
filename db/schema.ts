@@ -5,8 +5,12 @@ import {
   pgEnum,
   integer,
   index,
+  boolean,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+
 import { nanoid } from "nanoid";
+
 
 // --- Enums ---
 export const goalTypeEnum = pgEnum("goal_type", ["Quran", "Hadith", "Dua"]);
@@ -20,6 +24,7 @@ export const knowledgeTypeEnum = pgEnum("knowledge_type", [
   "Tafsir",
   "General",
 ]);
+export const prayerStatusEnum = pgEnum("prayer_status", ["Missed", "Alone", "Jamat"]);
 
 // --- Tables ---
 export const userTable = pgTable(
@@ -151,4 +156,35 @@ export const knowledgeTable = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("knowledge_entries_user_id_idx").on(table.userId)],
+);
+
+export const prayerTable = pgTable(
+  "prayer_entries",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    date: text("date").notNull(), // YYYY-MM-DD
+    fajr: prayerStatusEnum("fajr").notNull().default("Alone"),
+    dhuhr: prayerStatusEnum("dhuhr").notNull().default("Alone"),
+    asr: prayerStatusEnum("asr").notNull().default("Alone"),
+    maghrib: prayerStatusEnum("maghrib").notNull().default("Alone"),
+    isha: prayerStatusEnum("isha").notNull().default("Alone"),
+    sunnahFajr: boolean("sunnah_fajr").notNull().default(false),
+    sunnahDhuhr: boolean("sunnah_dhuhr").notNull().default(false),
+    sunnahAsr: boolean("sunnah_asr").notNull().default(false),
+    sunnahMaghrib: boolean("sunnah_maghrib").notNull().default(false),
+    sunnahIsha: boolean("sunnah_isha").notNull().default(false),
+    witr: boolean("witr").notNull().default(false),
+    tahajjud: boolean("tahajjud").notNull().default(false),
+    naflCount: integer("nafl_count").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("prayer_entries_user_id_idx").on(table.userId),
+    uniqueIndex("prayer_entries_user_date_idx").on(table.userId, table.date),
+  ],
 );

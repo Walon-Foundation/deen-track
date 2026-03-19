@@ -18,7 +18,13 @@ import {
   Zap,
   Quote,
   Search,
-  Filter
+  Filter,
+  Infinity,
+  Sparkles,
+  ChevronLeft,
+  X,
+  Check,
+  Calendar
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
@@ -62,6 +68,11 @@ export default function DashboardPage() {
   const [discoveryContent, setDiscoveryContent] = useState<any>(null);
   const [isDiscoveryLoading, setIsDiscoveryLoading] = useState(true);
   const [showMilestone, setShowMilestone] = useState(false);
+  const [prayerHistory, setPrayerHistory] = useState<any[]>([]);
+  const [isPrayerLoading, setIsPrayerLoading] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDayRecord, setSelectedDayRecord] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchDiscovery() {
@@ -143,6 +154,21 @@ export default function DashboardPage() {
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
+    async function fetchPrayers() {
+      if (activeNav === "calendar") {
+        setIsPrayerLoading(true);
+        try {
+          const res = await fetch("/api/dashboard/prayers");
+          const json = await res.json();
+          if (json.ok) setPrayerHistory(json.data);
+        } catch (err) { console.error("Prayer fetch error", err); }
+        finally { setIsPrayerLoading(false); }
+      }
+    }
+    if (isUserLoaded) fetchPrayers();
+  }, [activeNav, isUserLoaded]);
+
+  useEffect(() => {
     async function fetchVault() {
       if (activeNav === "journal" || activeNav === "vault") {
         setIsVaultLoading(true);
@@ -187,6 +213,7 @@ export default function DashboardPage() {
 
   const sidebarLinks = [
     { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: "calendar", label: "Salah Hub", icon: <Calendar className="w-5 h-5" /> },
     { id: "journal", label: "My Journal", icon: <History className="w-5 h-5" /> },
     { id: "vault", label: "History Vault", icon: <Library className="w-5 h-5" /> },
     { id: "settings", label: "Preferences", icon: <Settings className="w-5 h-5" /> },
@@ -493,6 +520,188 @@ export default function DashboardPage() {
                      )}
                   </motion.div>
                )}
+             </AnimatePresence>
+          </div>
+        );
+      case "calendar":
+        const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        const startDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        const monthStatus = Array.from({ length: daysInMonth(currentMonth) }, (_, i) => {
+          const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
+          return prayerHistory.find(p => p.date === dateStr);
+        });
+
+        return (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
+             <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                   <h1 className="text-4xl font-black text-slate-900 lowercase tracking-tighter">salah_hub.</h1>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })} Consistency</p>
+                </div>
+                <div className="flex items-center gap-3 bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm self-start">
+                   <button 
+                      onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
+                      className="p-2 hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-lg transition-colors border border-transparent hover:border-slate-100"
+                   >
+                      <ChevronLeft className="w-4 h-4" />
+                   </button>
+                   <span className="text-[10px] font-black uppercase tracking-widest px-4 text-slate-600">Syncing Chronos</span>
+                   <button 
+                      onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
+                      className="p-2 hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-lg transition-colors border border-transparent hover:border-slate-100 rotate-180"
+                   >
+                      <ChevronLeft className="w-4 h-4" />
+                   </button>
+                </div>
+             </div>
+
+             <AnimatePresence mode="wait">
+               {isPrayerLoading ? (
+                  <div className="py-32 flex flex-col items-center justify-center gap-4 bg-white border border-slate-200/50 rounded-[3rem]">
+                     <div className="w-10 h-10 border-4 border-sky-100 border-t-sky-500 rounded-full animate-spin" />
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Establishing Spiritual Connectivity</p>
+                  </div>
+               ) : (
+                  <div className="space-y-8">
+                     <div className="bg-white border border-slate-200/50 rounded-[3.5rem] p-8 sm:p-14 shadow-sm relative overflow-hidden">
+                        <div className="grid grid-cols-7 gap-4 mb-4">
+                           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                             <div key={day} className="text-center text-[10px] font-black text-slate-300 uppercase tracking-widest pb-4">{day}</div>
+                           ))}
+                           {Array.from({ length: startDay(currentMonth) }).map((_, i) => (
+                             <div key={`empty-${i}`} className="aspect-square" />
+                           ))}
+                           {monthStatus.map((record, i) => {
+                             const statusCount = record ? [record.fajr, record.dhuhr, record.asr, record.maghrib, record.isha].filter(s => s === 'Jamat' || s === 'Alone').length : 0;
+                             const isToday = new Date().toDateString() === new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1).toDateString();
+                             
+                             return (
+                               <div 
+                                 key={i} 
+                                 onClick={() => {
+                                   if (record) {
+                                     setSelectedDayRecord(record);
+                                     setIsModalOpen(true);
+                                   }
+                                 }}
+                                 className={`aspect-square sm:aspect-[1.2/1] bg-slate-50/50 border border-slate-200/60 rounded-3xl p-3 flex flex-col justify-between transition-all group relative cursor-pointer overflow-hidden ${record ? 'hover:bg-white hover:border-sky-300 hover:shadow-xl hover:shadow-slate-200/40' : 'opacity-40 grayscale'} ${isToday ? 'ring-2 ring-sky-500 border-sky-500' : ''}`}
+                               >
+                                  <div className="flex items-center justify-between">
+                                     <span className={`text-[11px] font-black ${isToday ? 'text-sky-600' : 'text-slate-400'} group-hover:text-sky-600`}>{i + 1}</span>
+                                     {record?.tahajjud && <Sparkles className="w-3 h-3 text-indigo-500" />}
+                                  </div>
+                                  
+                                  <div className="flex -space-x-1 sm:-space-x-1.5 justify-center">
+                                     {record ? [record.fajr, record.dhuhr, record.asr, record.maghrib, record.isha].map((s, idx) => (
+                                       <div key={idx} className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ring-2 ring-white ${s === 'Jamat' ? 'bg-emerald-500' : s === 'Alone' ? 'bg-sky-400' : 'bg-rose-400'}`} />
+                                     )) : (
+                                       <div className="w-full h-1.5 bg-slate-200 rounded-full" />
+                                     )}
+                                  </div>
+
+                                  {record && (
+                                     <div className="absolute top-0 right-0 w-12 h-12 bg-sky-50 rounded-full blur-[20px] -mr-6 -mt-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                  )}
+                               </div>
+                             );
+                           })}
+                        </div>
+
+                        <div className="mt-12 pt-10 border-t border-slate-100 flex flex-wrap items-center gap-8 justify-center sm:justify-start">
+                           <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20" />
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest underline decoration-emerald-200 decoration-2 underline-offset-4">Jamat Persistence</span>
+                           </div>
+                           <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-sky-400 shadow-lg shadow-sky-400/20" />
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest underline decoration-sky-200 decoration-2 underline-offset-4">Individual Flow</span>
+                           </div>
+                           <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-rose-400 shadow-lg shadow-rose-400/20" />
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest underline decoration-rose-200 decoration-2 underline-offset-4">Ruptured Loop</span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               )}
+             </AnimatePresence>
+
+             {/* Detail Modal */}
+             <AnimatePresence>
+                {isModalOpen && selectedDayRecord && (
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-xl bg-slate-900/40">
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                      className="bg-white rounded-[3.5rem] w-full max-w-2xl overflow-hidden shadow-2xl relative"
+                    >
+                       <button 
+                         onClick={() => setIsModalOpen(false)}
+                         className="absolute top-8 right-8 w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all hover:rotate-90 z-10"
+                       >
+                          <X className="w-5 h-5" />
+                       </button>
+
+                       <div className="p-10 sm:p-14">
+                          <div className="mb-12">
+                             <p className="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em] mb-3">Chronological Seal</p>
+                             <h2 className="text-4xl font-black text-slate-900 tracking-tighter lowercase">
+                               {new Date(selectedDayRecord.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}.
+                             </h2>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                             <div className="space-y-6">
+                                <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50 pb-2">The Pulse Matrix</h4>
+                                {[
+                                  { n: 'Fajr', s: selectedDayRecord.fajr, sun: 'sunnahFajr' },
+                                  { n: 'Dhuhr', s: selectedDayRecord.dhuhr, sun: 'sunnahDhuhr' },
+                                  { n: 'Asr', s: selectedDayRecord.asr, sun: 'sunnahAsr' },
+                                  { n: 'Maghrib', s: selectedDayRecord.maghrib, sun: 'sunnahMaghrib' },
+                                  { n: 'Isha', s: selectedDayRecord.isha, sun: 'sunnahIsha' }
+                                ].map(pr => (
+                                  <div key={pr.n} className="flex items-center justify-between group">
+                                     <div className="flex items-center gap-3">
+                                        <div className={`w-2 h-2 rounded-full ${pr.s === 'Jamat' ? 'bg-emerald-500' : pr.s === 'Alone' ? 'bg-sky-400' : 'bg-rose-400'}`} />
+                                        <span className="text-sm font-black text-slate-900">{pr.n}</span>
+                                     </div>
+                                     <div className="flex items-center gap-3">
+                                        {selectedDayRecord[pr.sun] && <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${pr.s === 'Missed' ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-slate-400'}`}>{pr.s}</span>
+                                     </div>
+                                  </div>
+                                ))}
+                             </div>
+
+                             <div className="space-y-8">
+                                <div className="p-8 bg-slate-900 rounded-[2.5rem] relative overflow-hidden group">
+                                   <div className="relative z-10">
+                                      <p className="text-[9px] font-black text-sky-400 uppercase tracking-widest mb-4">Night Rituals</p>
+                                      <div className="space-y-4">
+                                         <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-slate-400">Tahajjud</span>
+                                            {selectedDayRecord.tahajjud ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-3.5 h-3.5 text-slate-700" />}
+                                         </div>
+                                         <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-slate-400">Witr Seal</span>
+                                            {selectedDayRecord.witr ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-3.5 h-3.5 text-slate-700" />}
+                                         </div>
+                                      </div>
+                                   </div>
+                                   <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-sky-500/10 rounded-full blur-[40px]" />
+                                </div>
+
+                                <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100/50">
+                                   <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Extra Merit</p>
+                                   <h5 className="text-2xl font-black text-emerald-900 leading-none">{selectedDayRecord.naflCount} <span className="text-[10px] text-emerald-600/60 uppercase tracking-tighter">Nafl Units</span></h5>
+                                </div>
+                             </div>
+                          </div>
+                       </div>
+                    </motion.div>
+                  </div>
+                )}
              </AnimatePresence>
           </div>
         );
