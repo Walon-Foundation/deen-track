@@ -63,12 +63,8 @@
           "name": "dua_entries_user_id_users_id_fk",
           "tableFrom": "dua_entries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -154,12 +150,8 @@
           "name": "goal_tracker_user_id_users_id_fk",
           "tableFrom": "goal_tracker",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -234,12 +226,8 @@
           "name": "hadith_entries_user_id_users_id_fk",
           "tableFrom": "hadith_entries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -314,12 +302,8 @@
           "name": "journal_entries_user_id_users_id_fk",
           "tableFrom": "journal_entries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -396,12 +380,8 @@
           "name": "knowledge_entries_user_id_users_id_fk",
           "tableFrom": "knowledge_entries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -486,12 +466,8 @@
           "name": "quran_entries_user_id_users_id_fk",
           "tableFrom": "quran_entries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -570,9 +546,7 @@
         "users_clerk_id_unique": {
           "name": "users_clerk_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "clerk_id"
-          ]
+          "columns": ["clerk_id"]
         }
       },
       "policies": {},
@@ -584,47 +558,27 @@
     "public.frequency": {
       "name": "frequency",
       "schema": "public",
-      "values": [
-        "Daily",
-        "Weekly"
-      ]
+      "values": ["Daily", "Weekly"]
     },
     "public.goal_type": {
       "name": "goal_type",
       "schema": "public",
-      "values": [
-        "Quran",
-        "Hadith",
-        "Dua"
-      ]
+      "values": ["Quran", "Hadith", "Dua"]
     },
     "public.knowledge_type": {
       "name": "knowledge_type",
       "schema": "public",
-      "values": [
-        "Seerah",
-        "History",
-        "Fiqh",
-        "Tafsir",
-        "General"
-      ]
+      "values": ["Seerah", "History", "Fiqh", "Tafsir", "General"]
     },
     "public.language": {
       "name": "language",
       "schema": "public",
-      "values": [
-        "Arabic",
-        "English",
-        "Both"
-      ]
+      "values": ["Arabic", "English", "Both"]
     },
     "public.status": {
       "name": "status",
       "schema": "public",
-      "values": [
-        "Read",
-        "Memorized"
-      ]
+      "values": ["Read", "Memorized"]
     }
   },
   "schemas": {},
