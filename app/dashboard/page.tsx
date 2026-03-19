@@ -214,7 +214,7 @@ export default function DashboardPage() {
 
   const sidebarLinks = [
     { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
-    { id: "calendar", label: "Salah Hub", icon: <Calendar className="w-5 h-5" /> },
+    { id: "calendar", label: "Salah Hub", icon: <Calendar className="w-5 h-5" />, badge: data?.todayPrayerCount !== undefined ? `${data.todayPrayerCount}/5` : null },
     { id: "journal", label: "My Journal", icon: <History className="w-5 h-5" /> },
     { id: "vault", label: "History Vault", icon: <Library className="w-5 h-5" /> },
     { id: "settings", label: "Preferences", icon: <Settings className="w-5 h-5" /> },
@@ -711,7 +711,7 @@ export default function DashboardPage() {
                                 <h3 className="text-xl font-black text-slate-900 mb-2">Absolute Absence.</h3>
                                 <p className="text-slate-400 text-xs font-bold max-w-[240px] leading-relaxed uppercase tracking-widest">No spiritual record synchronized for this chronological node.</p>
                                  {(selectedDateStr && new Date(selectedDateStr).toDateString() === new Date().toDateString()) && (
-                                   <Link href="/entry" className="mt-10 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all">
+                                   <Link href="/entry?tab=Salah" className="mt-10 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all">
                                       Initialize Protocol
                                    </Link>
                                  )}
@@ -761,6 +761,11 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-sm font-bold tracking-tight">{link.label}</span>
               </div>
+              {link.badge && (
+                <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${activeNav === link.id ? "bg-sky-400 text-slate-900" : "bg-sky-50 text-sky-600 border border-sky-100"}`}>
+                  {link.badge}
+                </div>
+              )}
             </button>
           ))}
         </nav>

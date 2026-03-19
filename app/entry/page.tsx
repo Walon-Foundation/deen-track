@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Loader2, Sunrise, Sun, CloudSun, Sunset, Moon, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 // Shadcn UI Imports
@@ -154,7 +154,16 @@ type EntryCategory = "Quran" | "Hadith" | "Dua" | "Knowledge" | "Salah";
 
 export default function EntryPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [entryCategory, setEntryCategory] = useState<EntryCategory>("Quran");
+
+  useEffect(() => {
+    const tab = searchParams.get("tab") as EntryCategory;
+    if (tab && ["Quran", "Hadith", "Dua", "Knowledge", "Salah"].includes(tab)) {
+      setEntryCategory(tab);
+    }
+  }, [searchParams]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Quran States
