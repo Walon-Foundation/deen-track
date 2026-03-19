@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { AppLayoutWrapper } from "@/components/layout/AppLayoutWrapper";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,7 +34,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-sky-100 selection:text-sky-900`}
         >
-          <ToastContainer position="top-right" autoClose={3000} theme="light" />
+          <Toaster position="top-right" closeButton richColors duration={5000} theme="light" />
           <AppLayoutWrapper>{children}</AppLayoutWrapper>
         </body>
       </html>

@@ -8,9 +8,6 @@ import {
   Brain,
   Star,
   Plus,
-  TrendingUp,
-  Clock,
-  Calendar,
   Loader2,
   LayoutDashboard,
   ArrowUpRight,
@@ -139,24 +136,6 @@ export default function DashboardPage() {
     </div>
   );
 
-  if (!isUserLoaded) return null;
-
-  const chartData = data?.chart && data.chart.length > 0 ? data.chart : [];
-
-  const statCards = [
-    { label: "Quranic Verses", value: data?.stats.quran || 0, icon: <BookOpen className="w-5 h-5" />, color: "from-sky-500/10 to-blue-500/5", iconColor: "text-sky-600" },
-    { label: "Hadith Studies", value: data?.stats.hadith || 0, icon: <Star className="w-5 h-5" />, color: "from-amber-500/10 to-orange-500/5", iconColor: "text-amber-600" },
-    { label: "Supplications", value: data?.stats.dua || 0, icon: <MessageCircle className="w-5 h-5" />, color: "from-emerald-500/10 to-green-500/5", iconColor: "text-emerald-600" },
-    { label: "Knowledge Points", value: data?.stats.knowledge || 0, icon: <Brain className="w-5 h-5" />, color: "from-purple-500/10 to-indigo-500/5", iconColor: "text-purple-600" },
-  ];
-
-  const sidebarLinks = [
-    { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
-    { id: "journal", label: "My Journal", icon: <History className="w-5 h-5" /> },
-    { id: "vault", label: "History Vault", icon: <Library className="w-5 h-5" /> },
-    { id: "settings", label: "Preferences", icon: <Settings className="w-5 h-5" /> },
-  ];
-
   const [vaultData, setVaultData] = useState<any[]>([]);
   const [isVaultLoading, setIsVaultLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -194,6 +173,24 @@ export default function DashboardPage() {
     setPage(1);
     setHasMore(true);
   }, [activeNav]);
+
+  if (!isUserLoaded) return null;
+
+  const chartData = data?.chart && data.chart.length > 0 ? data.chart : [];
+
+  const statCards = [
+    { label: "Quranic Verses", value: data?.stats.quran || 0, icon: <BookOpen className="w-5 h-5" />, color: "from-sky-500/10 to-blue-500/5", iconColor: "text-sky-600" },
+    { label: "Hadith Studies", value: data?.stats.hadith || 0, icon: <Star className="w-5 h-5" />, color: "from-amber-500/10 to-orange-500/5", iconColor: "text-amber-600" },
+    { label: "Supplications", value: data?.stats.dua || 0, icon: <MessageCircle className="w-5 h-5" />, color: "from-emerald-500/10 to-green-500/5", iconColor: "text-emerald-600" },
+    { label: "Knowledge Points", value: data?.stats.knowledge || 0, icon: <Brain className="w-5 h-5" />, color: "from-purple-500/10 to-indigo-500/5", iconColor: "text-purple-600" },
+  ];
+
+  const sidebarLinks = [
+    { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: "journal", label: "My Journal", icon: <History className="w-5 h-5" /> },
+    { id: "vault", label: "History Vault", icon: <Library className="w-5 h-5" /> },
+    { id: "settings", label: "Preferences", icon: <Settings className="w-5 h-5" /> },
+  ];
 
   const filteredVault = (vaultData || []).filter((item: any) => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
