@@ -82,6 +82,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
 
+    const QURAN_BASE = process.env.QURAN_BASE_URL || "https://api.alquran.cloud/v1";
+    const HADITH_BASE = process.env.HADITH_BASE_URL || "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1";
+
     const sources = ["quran", "hadith", "dua"];
     const chosen = category && sources.includes(category) 
         ? category 
@@ -91,39 +94,42 @@ export async function GET(req: Request) {
 
     if (chosen === "quran") {
       const randomAyahId = Math.floor(Math.random() * 6236) + 1;
-      const res = await fetch(`${process.env.ALQURAN_ROUTE}/${randomAyahId}/editions/quran-uthmani,en.asad,en.transliteration`);
+      const res = await fetch(`${QURAN_BASE}/ayah/${randomAyahId}/editions/quran-uthmani,en.asad,en.transliteration`);
       const data = await res.json();
       
       if (data.status === "OK") {
-        const arabic = data.data[0].text;
-        const english = data.data[1].text;
-        const transliteration = data.data[2].text;
-        const surah = data.data[0].surah;
-
         content = {
           type: "Quran",
-          arabic,
-          english,
-          transliteration,
-          reference: `Surah ${surah.englishName} (${surah.number}:${data.data[0].numberInSurah})`,
+          arabic: data.data[0].text,
+          english: data.data[1].text,
+          transliteration: data.data[2].text,
+          reference: `Surah ${data.data[0].surah.englishName} (${data.data[0].surah.number}:${data.data[0].numberInSurah})`,
         };
       }
     } else if (chosen === "hadith") {
-      const res = await fetch(process.env.HADITHS_ROUTE!);
-      const data = await res.json();
+      // Restore parallel fetch to ensure Arabic text is available
+      const [engRes, araRes] = await Promise.all([
+        fetch(`${HADITH_BASE}/editions/eng-bukhari.json`, { next: { revalidate: 7200 } }),
+        fetch(`${HADITH_BASE}/editions/ara-bukhari.json`, { next: { revalidate: 7200 } })
+      ]);
       
-      if (data.hadiths) {
-          const item = data.hadiths[Math.floor(Math.random() * data.hadiths.length)];
+      const engData = await engRes.json();
+      const araData = await araRes.json();
+      
+      if (engData.hadiths && araData.hadiths) {
+          const randomIdx = Math.floor(Math.random() * engData.hadiths.length);
+          const iEng = engData.hadiths[randomIdx];
+          const iAra = araData.hadiths[randomIdx];
+          
           content = {
             type: "Hadith",
-            arabic: null, 
-            english: item.text,
+            arabic: iAra?.text || null, 
+            english: iEng?.text,
             transliteration: null,
-            reference: `Sahih al-Bukhari, Hadith #${item.hadithnumber}`,
+            reference: `Sahih al-Bukhari, Hadith #${iEng.hadithnumber}`,
           };
       }
     } else if (chosen === "dua") {
-       // Using our expanded internal library for high-fidelity Duas
        const item = CURATED_DUAS[Math.floor(Math.random() * CURATED_DUAS.length)];
        content = {
            type: "Dua",
@@ -137,8 +143,8 @@ export async function GET(req: Request) {
     if (!content) throw new Error("Fetch failed");
 
     return NextResponse.json({ ok: true, data: content });
-  } catch (err) {
-    console.error("[DISCOVERY_ERROR]", err);
-    return NextResponse.json({ ok: false, message: "Service unavailable" });
+  } catch (err: any) {
+    console.error("[DISCOVERY_ERROR]", err.message);
+    return NextResponse.json({ ok: false, message: "Service unavailable" }, { status: 500 });
   }
 }
