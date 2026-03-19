@@ -62,6 +62,24 @@ export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState("7D");
   const [data, setData] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [discoveryContent, setDiscoveryContent] = useState<any>(null);
+  const [isDiscoveryLoading, setIsDiscoveryLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchDiscovery() {
+      setIsDiscoveryLoading(true);
+      try {
+        const res = await fetch("/api/discovery/daily");
+        const json = await res.json();
+        if (json.ok) setDiscoveryContent(json.data);
+      } catch (err) {
+        console.error("Discovery fetch error:", err);
+      } finally {
+        setIsDiscoveryLoading(false);
+      }
+    }
+    fetchDiscovery();
+  }, []);
 
   useEffect(() => {
     async function fetchStats() {
@@ -233,20 +251,48 @@ export default function DashboardPage() {
                       </div>
                    </div>
 
-                   <div className="bg-slate-900 rounded-[2rem] sm:rounded-[3rem] p-8 shadow-2xl relative overflow-hidden group">
-                      <Quote className="w-6 h-6 text-sky-500/30 mb-4" />
-                      <p className="text-base sm:text-lg font-black text-white leading-tight mb-4 tracking-tight">
-                        Quality over quantity. A small deed done consistently is better than a mountain of deeds.
-                      </p>
-                      <button onClick={() => setActiveNav("vault")} className="text-[10px] font-black text-sky-500 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
-                        Explore Vault <ChevronRight className="w-3 h-3" />
-                      </button>
+                   <div className="bg-slate-900 rounded-[2rem] sm:rounded-[3rem] p-7 sm:p-8 shadow-2xl relative overflow-hidden group min-h-[220px] flex flex-col justify-between">
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                           <div className="bg-sky-500/20 px-3 py-1 rounded-full border border-sky-500/30">
+                              <p className="text-[9px] font-black text-sky-400 uppercase tracking-[0.2em] leading-none">
+                                {isDiscoveryLoading ? "Loading..." : `${discoveryContent?.type} of the day`}
+                              </p>
+                           </div>
+                           <Quote className="w-5 h-5 text-sky-500/30" />
+                        </div>
+                        
+                        {isDiscoveryLoading ? (
+                           <div className="space-y-3">
+                              <div className="h-4 w-full bg-white/5 animate-pulse rounded" />
+                              <div className="h-4 w-2/3 bg-white/5 animate-pulse rounded" />
+                           </div>
+                        ) : (
+                           <div>
+                              <p className={`font-black text-white tracking-tight mb-4 transition-all duration-700 ${discoveryContent?.text?.length > 120 ? "text-sm leading-relaxed" : "text-lg leading-tight"}`}>
+                                "{discoveryContent?.text}"
+                              </p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none bg-white/5 py-2 px-3 rounded-lg inline-block">
+                                Reference: {discoveryContent?.reference}
+                              </p>
+                           </div>
+                        )}
+                      </div>
+
+                      <div className="mt-6 flex items-center justify-between relative z-10 border-t border-white/5 pt-4">
+                        <Link href="/discovery" className="text-[9px] font-black text-sky-500 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
+                          Expand Full View <ChevronRight className="w-2.5 h-2.5" />
+                        </Link>
+                        <div className="w-2 h-2 rounded-full bg-sky-500/40 animate-pulse" />
+                      </div>
+
+                      <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-sky-500/5 rounded-full blur-[60px] pointer-events-none" />
                    </div>
                 </div>
              </div>
           </div>
         );
-      case "vault":
+       case "vault":
       case "journal":
         return (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">

@@ -9,7 +9,8 @@ import {
   LayoutDashboard, 
   PlusCircle, 
   Settings, 
-  LogOut 
+  LogOut,
+  Brain
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
@@ -35,8 +36,14 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4 relative">
+          <Link
+            href="/discovery"
+            className="hidden sm:block text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            Discover
+          </Link>
           {!isSignedIn ? (
-            <>
+              <>
               <button
                 onClick={() => router.push("/sign-in")}
                 className="hidden sm:block text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
@@ -53,6 +60,9 @@ export function Navbar() {
           ) : (
             <div className="flex items-center gap-3 sm:gap-5">
               <div className="flex sm:hidden items-center gap-2">
+                <Link href="/discovery" className="p-2 text-slate-400 hover:text-sky-500 transition-colors">
+                  <Brain className="w-6 h-6" />
+                </Link>
                 <Link href="/dashboard" className="p-2 text-slate-500 hover:text-sky-600 transition-colors">
                   <LayoutDashboard className="w-6 h-6" />
                 </Link>
