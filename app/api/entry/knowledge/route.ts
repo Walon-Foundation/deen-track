@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
-import { journalTable, userTable } from "@/db/schema";
+import { knowledgeTable, userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { journalEntrySchema } from "@/validators";
+import { knowledgeEntrySchema } from "@/validators";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,23 +18,24 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validated = journalEntrySchema.safeParse(body);
+    const validated = knowledgeEntrySchema.safeParse(body);
 
     if (!validated.success) {
       return NextResponse.json({ ok: false, message: "Invalid request data" }, { status: 400 });
     }
 
-    const { title, content } = validated.data;
+    const { knowledgeType, title, notes } = validated.data;
 
-    await db.insert(journalTable).values({
+    await db.insert(knowledgeTable).values({
       userId: user.id,
-      title: title || null,
-      content
+      knowledgeType: knowledgeType as ("Seerah" | "History" | "Fiqh" | "Tafsir" | "General"),
+      title,
+      notes: notes || null
     });
 
-    return NextResponse.json({ ok: true, message: "Journal entry successfully saved." }, { status: 201 });
+    return NextResponse.json({ ok: true, message: "Knowledge entry successfully saved." }, { status: 201 });
   } catch (err) {
-    console.error("[JOURNAL_ENTRY_ERROR]", err);
+    console.error("[KNOWLEDGE_ENTRY_ERROR]", err);
     return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });
   }
 }

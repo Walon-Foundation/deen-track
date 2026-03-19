@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
-import { journalTable, userTable } from "@/db/schema";
+import { duaTable, userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { journalEntrySchema } from "@/validators";
+import { duaEntrySchema } from "@/validators";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,23 +18,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validated = journalEntrySchema.safeParse(body);
+    const validated = duaEntrySchema.safeParse(body);
 
     if (!validated.success) {
       return NextResponse.json({ ok: false, message: "Invalid request data" }, { status: 400 });
     }
 
-    const { title, content } = validated.data;
+    const { category, count } = validated.data;
 
-    await db.insert(journalTable).values({
+    await db.insert(duaTable).values({
       userId: user.id,
-      title: title || null,
-      content
+      category,
+      count
     });
 
-    return NextResponse.json({ ok: true, message: "Journal entry successfully saved." }, { status: 201 });
+    return NextResponse.json({ ok: true, message: "Dua entry successfully saved." }, { status: 201 });
   } catch (err) {
-    console.error("[JOURNAL_ENTRY_ERROR]", err);
+    console.error("[DUA_ENTRY_ERROR]", err);
     return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
-import { journalTable, userTable } from "@/db/schema";
+import { quranTable, userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { journalEntrySchema } from "@/validators";
+import { quranEntrySchema } from "@/validators";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,23 +18,26 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validated = journalEntrySchema.safeParse(body);
+    const validated = quranEntrySchema.safeParse(body);
 
     if (!validated.success) {
       return NextResponse.json({ ok: false, message: "Invalid request data" }, { status: 400 });
     }
 
-    const { title, content } = validated.data;
+    const { surahName, verseStart, verseEnd, status, language } = validated.data;
 
-    await db.insert(journalTable).values({
+    await db.insert(quranTable).values({
       userId: user.id,
-      title: title || null,
-      content
+      surahName,
+      verseStart,
+      verseEnd,
+      status,
+      language
     });
 
-    return NextResponse.json({ ok: true, message: "Journal entry successfully saved." }, { status: 201 });
+    return NextResponse.json({ ok: true, message: "Quran entry successfully saved." }, { status: 201 });
   } catch (err) {
-    console.error("[JOURNAL_ENTRY_ERROR]", err);
+    console.error("[QURAN_ENTRY_ERROR]", err);
     return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });
   }
 }
