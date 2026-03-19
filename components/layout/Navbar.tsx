@@ -43,7 +43,18 @@ export function Navbar() {
             Discover
           </Link>
           {!isSignedIn ? (
-              <>
+            <>
+              <div className="flex sm:hidden items-center gap-2">
+                <Link href="/discovery" className="p-2 text-slate-400 hover:text-sky-500 transition-colors">
+                  <Brain className="w-6 h-6" />
+                </Link>
+                <button
+                  onClick={() => router.push("/sign-up")}
+                  className="text-[10px] font-black bg-slate-900 text-white px-4 py-2 rounded-full shadow-md transition-all active:scale-95 uppercase tracking-widest"
+                >
+                  Join
+                </button>
+              </div>
               <button
                 onClick={() => router.push("/sign-in")}
                 className="hidden sm:block text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
@@ -52,7 +63,7 @@ export function Navbar() {
               </button>
               <button
                 onClick={() => router.push("/sign-up")}
-                className="text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full shadow-md shadow-slate-900/10 transition-all hover:scale-105 active:scale-95"
+                className="hidden sm:block text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full shadow-md shadow-slate-900/10 transition-all hover:scale-105 active:scale-95"
               >
                 Get Started
               </button>

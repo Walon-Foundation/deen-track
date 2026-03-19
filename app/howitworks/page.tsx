@@ -23,14 +23,14 @@ export default function HowItWorks() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFDFF] text-slate-900 pt-40 pb-32">
+    <div className="min-h-screen bg-[#FDFDFF] text-slate-900 pt-24 sm:pt-40 pb-20 sm:pb-32">
       <div className="max-w-4xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-20"
         >
-          <h1 className="text-5xl font-black tracking-tight text-slate-900 mb-6 lowercase leading-none">
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 mb-6 lowercase leading-none">
             how_it_works.
           </h1>
           <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">

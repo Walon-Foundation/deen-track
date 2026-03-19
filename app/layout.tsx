@@ -15,8 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DeenTrack",
-  description: "Your modern spiritual growth workspace.",
+  title: "DeenTrack | High-Fidelity Spiritual Protocol",
+  description: "A private, analytics-first platform for tracking spiritual progress, daily reflections, and sacred wisdom discovery.",
+  icons: {
+    icon: "/favicon.ico",
+  }
 };
 
 export default function RootLayout({

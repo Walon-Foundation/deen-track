@@ -23,14 +23,14 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 pt-40 pb-32">
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 pt-24 sm:pt-40 pb-20 sm:pb-32">
       <div className="max-w-4xl mx-auto px-6">
         <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
            className="mb-24 text-center sm:text-left"
         >
-           <h1 className="text-6xl font-black tracking-tight text-slate-900 mb-8 lowercase leading-none">
+           <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 mb-8 lowercase leading-none">
               privacy_first.
            </h1>
            <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-2xl">
@@ -38,8 +38,8 @@ export default function PrivacyPage() {
            </p>
         </motion.div>
 
-        <section className="space-y-16">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <section className="space-y-12 sm:space-y-16">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
               {principles.map((p, i) => (
                 <div key={i} className="bg-white border border-slate-200/50 p-8 rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 group">
                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-sky-50 transition-all">

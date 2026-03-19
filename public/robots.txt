@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /discovery
+Disallow: /dashboard
+Disallow: /entry
+Disallow: /sign-in
+Disallow: /sign-up
+
+Sitemap: https://deentrack.com/sitemap.xml
