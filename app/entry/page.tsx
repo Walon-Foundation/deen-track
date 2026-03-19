@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 // Shadcn UI Imports
 import { Label } from "@/components/ui/label";
@@ -165,7 +166,7 @@ export default function EntryPage() {
 
   // Dua States
   const [duaCategory, setDuaCategory] = useState<string>("General");
-  const [duaCount, setDuaCount] = useState<number>(1);
+  const [duaCount, setDuaCount] = useState<number>(0);
 
   // Hadith States
   const [hadithCollection, setHadithCollection] = useState<string>("");
@@ -224,12 +225,13 @@ export default function EntryPage() {
       
       const data = await res.json();
       if (data.ok) {
+        toast.success("Spiritual entry saved successfully!");
         router.push("/dashboard");
       } else {
-        alert("Error: " + data.message);
+        toast.error("Error: " + data.message);
       }
     } catch (err) {
-      alert("Failed to save entry.");
+      toast.error("Failed to save entry. Please check your connection.");
     } finally {
       setIsSubmitting(false);
     }
@@ -248,12 +250,13 @@ export default function EntryPage() {
       
       const data = await res.json();
       if (data.ok) {
+        toast.success("Journal reflection added.");
         router.push("/dashboard");
       } else {
-        alert("Error: " + data.message);
+        toast.error("Error: " + data.message);
       }
     } catch (err) {
-      alert("Failed to save journal.");
+      toast.error("Failed to save journal.");
     } finally {
       setIsSubmitting(false);
     }
@@ -636,9 +639,9 @@ export default function EntryPage() {
                           </Label>
                           <Input
                             value={duaCount}
-                            onChange={(e) => setDuaCount(Math.max(1, parseInt(e.target.value) || 1))}
+                            onChange={(e) => setDuaCount(Math.max(0, parseInt(e.target.value) || 0))}
                             type="number"
-                            min="1"
+                            min="0"
                             className="h-11 bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base shadow-sm"
                             required
                           />

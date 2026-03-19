@@ -22,6 +22,13 @@
       "when": 1773930253294,
       "tag": "0002_wandering_sleeper",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773946428695,
+      "tag": "0003_kind_bill_hollister",
+      "breakpoints": true
     }
   ]
 }

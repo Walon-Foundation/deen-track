@@ -1,0 +1,1 @@
+ALTER TABLE "hadith_entries" ADD COLUMN "book" text NOT NULL;
