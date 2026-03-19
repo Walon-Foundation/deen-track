@@ -818,7 +818,7 @@ export default function EntryPage() {
                                </div>
                             </div>
 
-                            <div className="flex overflow-x-auto pb-6 gap-4 no-scrollbar -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-5 lg:gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                                {[
                                  { id: 'fajr', label: 'Fajr', time: '5:12 AM', state: fajrStatus, set: setFajrStatus, sunnah: sunnahFajr, setSunnah: setSunnahFajr, icon: <Moon className="w-5 h-5" />, bg: "bg-sky-50", text: "text-sky-600", border: "border-sky-100" },
                                  { id: 'dhuhr', label: 'Dhuhr', time: '12:45 PM', state: dhuhrStatus, set: setDhuhrStatus, sunnah: sunnahDhuhr, setSunnah: setSunnahDhuhr, icon: <Sun className="w-5 h-5" />, bg: "bg-teal-50", text: "text-teal-600", border: "border-teal-100" },
@@ -826,36 +826,40 @@ export default function EntryPage() {
                                  { id: 'maghrib', label: 'Maghrib', time: '6:08 PM', state: maghribStatus, set: setMaghribStatus, sunnah: sunnahMaghrib, setSunnah: setSunnahMaghrib, icon: <Sunset className="w-5 h-5" />, bg: "bg-rose-50", text: "text-rose-600", border: "border-rose-100" },
                                  { id: 'isha', label: 'Isha', time: '7:30 PM', state: ishaStatus, set: setIshaStatus, sunnah: sunnahIsha, setSunnah: setSunnahIsha, icon: <Moon className="w-5 h-5" />, bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100" },
                                ].map((p) => (
-                                 <div key={p.id} className={`min-w-[160px] flex-shrink-0 p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500 group relative overflow-hidden ${p.state !== 'Missed' ? 'border-sky-100' : ''}`}>
-                                    <div className="flex flex-col items-center text-center relative z-10">
-                                       <div className={`w-14 h-14 rounded-2xl ${p.bg} flex items-center justify-center ${p.text} mb-4 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6`}>
-                                          {p.icon}
-                                       </div>
-                                       <h4 className="font-black text-slate-900 tracking-tight text-lg mb-1">{p.label}</h4>
-                                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">{p.time}</p>
+                                  <div key={p.id} className={`p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500 group relative overflow-hidden ${p.state !== "Missed" ? "border-sky-100" : ""}`}>
+                                     <div className="relative z-10 flex flex-col h-full">
+                                        <div className="flex items-center gap-4 mb-6">
+                                          <div className={`w-12 h-12 rounded-2xl ${p.bg} flex items-center justify-center ${p.text} transition-all duration-700 group-hover:scale-110`}>
+                                              {p.icon}
+                                          </div>
+                                          <div>
+                                            <h4 className="font-black text-slate-900 tracking-tight text-lg leading-tight">{p.label}</h4>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.time}</p>
+                                          </div>
+                                        </div>
 
-                                       <div className="flex flex-col gap-2 w-full">
-                                          {['Missed', 'Alone', 'Jamat'].map((status) => (
-                                            <button
-                                              key={status}
-                                              type="button"
-                                              onClick={() => p.set(status)}
-                                              className={`w-full py-2 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${p.state === status ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-400 bg-slate-50 hover:bg-slate-100"}`}
-                                            >
-                                              {status}
-                                            </button>
-                                          ))}
-                                       </div>
+                                        <div className="flex bg-slate-50 p-1 rounded-2xl gap-1 mb-6">
+                                           {["Missed", "Alone", "Jamat"].map((status) => (
+                                             <button
+                                               key={status}
+                                               type="button"
+                                               onClick={() => p.set(status)}
+                                               className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${p.state === status ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"}`}
+                                             >
+                                               {status}
+                                             </button>
+                                           ))}
+                                        </div>
 
-                                       <button 
-                                          type="button"
-                                          onClick={() => p.setSunnah(!p.sunnah)}
-                                          className={`mt-4 w-full h-8 rounded-full border transition-all flex items-center justify-center gap-2 ${p.sunnah ? "bg-emerald-500 text-white border-transparent" : "bg-white border-slate-100 text-slate-300 hover:text-emerald-500 hover:border-emerald-100"}`}
-                                       >
-                                          <Sparkles className={`w-3 h-3 ${p.sunnah ? "fill-white" : ""}`} />
-                                          <span className="text-[8px] font-black uppercase tracking-[0.2em]">Sunnah</span>
-                                       </button>
-                                    </div>
+                                        <button 
+                                           type="button"
+                                           onClick={() => p.setSunnah(!p.sunnah)}
+                                           className={`mt-auto w-full h-10 rounded-xl border transition-all flex items-center justify-center gap-2 ${p.sunnah ? "bg-emerald-500 text-white border-transparent" : "bg-white border-slate-100 text-slate-400 hover:text-emerald-500 hover:border-emerald-100"}`}
+                                        >
+                                           <Sparkles className={`w-3.5 h-3.5 ${p.sunnah ? "fill-white" : ""}`} />
+                                           <span className="text-[9px] font-black uppercase tracking-[0.2em]">Sunnah Achievement</span>
+                                        </button>
+                                     </div>
                                     <div className={`absolute top-0 right-0 w-20 h-20 ${p.bg} rounded-full blur-[30px] -mr-10 -mt-10 opacity-40 group-hover:opacity-100 transition-opacity`} />
                                  </div>
                                ))}

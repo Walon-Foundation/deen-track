@@ -72,6 +72,7 @@ export default function DashboardPage() {
   const [isPrayerLoading, setIsPrayerLoading] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDayRecord, setSelectedDayRecord] = useState<any>(null);
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -572,17 +573,16 @@ export default function DashboardPage() {
                              <div key={`empty-${i}`} className="aspect-square" />
                            ))}
                            {monthStatus.map((record, i) => {
-                             const statusCount = record ? [record.fajr, record.dhuhr, record.asr, record.maghrib, record.isha].filter(s => s === 'Jamat' || s === 'Alone').length : 0;
+                             const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`;
                              const isToday = new Date().toDateString() === new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1).toDateString();
                              
                              return (
                                <div 
                                  key={i} 
                                  onClick={() => {
-                                   if (record) {
-                                     setSelectedDayRecord(record);
-                                     setIsModalOpen(true);
-                                   }
+                                   setSelectedDateStr(dateStr);
+                                   setSelectedDayRecord(record || null);
+                                   setIsModalOpen(true);
                                  }}
                                  className={`aspect-square sm:aspect-[1.2/1] bg-slate-50/50 border border-slate-200/60 rounded-3xl p-3 flex flex-col justify-between transition-all group relative cursor-pointer overflow-hidden ${record ? 'hover:bg-white hover:border-sky-300 hover:shadow-xl hover:shadow-slate-200/40' : 'opacity-40 grayscale'} ${isToday ? 'ring-2 ring-sky-500 border-sky-500' : ''}`}
                                >
@@ -628,7 +628,7 @@ export default function DashboardPage() {
 
              {/* Detail Modal */}
              <AnimatePresence>
-                {isModalOpen && selectedDayRecord && (
+                {isModalOpen && (
                   <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-xl bg-slate-900/40">
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -647,57 +647,76 @@ export default function DashboardPage() {
                           <div className="mb-12">
                              <p className="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em] mb-3">Chronological Seal</p>
                              <h2 className="text-4xl font-black text-slate-900 tracking-tighter lowercase">
-                               {new Date(selectedDayRecord.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}.
+                               {new Date(selectedDateStr || selectedDayRecord?.date).toLocaleDateString("en-US", {
+                                 day: "numeric",
+                                 month: "long",
+                                 year: "numeric",
+                               })}.
                              </h2>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50 pb-2">The Pulse Matrix</h4>
-                                {[
-                                  { n: 'Fajr', s: selectedDayRecord.fajr, sun: 'sunnahFajr' },
-                                  { n: 'Dhuhr', s: selectedDayRecord.dhuhr, sun: 'sunnahDhuhr' },
-                                  { n: 'Asr', s: selectedDayRecord.asr, sun: 'sunnahAsr' },
-                                  { n: 'Maghrib', s: selectedDayRecord.maghrib, sun: 'sunnahMaghrib' },
-                                  { n: 'Isha', s: selectedDayRecord.isha, sun: 'sunnahIsha' }
-                                ].map(pr => (
-                                  <div key={pr.n} className="flex items-center justify-between group">
-                                     <div className="flex items-center gap-3">
-                                        <div className={`w-2 h-2 rounded-full ${pr.s === 'Jamat' ? 'bg-emerald-500' : pr.s === 'Alone' ? 'bg-sky-400' : 'bg-rose-400'}`} />
-                                        <span className="text-sm font-black text-slate-900">{pr.n}</span>
+                           {selectedDayRecord ? (
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                   <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50 pb-2">The Pulse Matrix</h4>
+                                   {[
+                                     { n: "Fajr", s: selectedDayRecord.fajr, sun: "sunnahFajr" },
+                                     { n: "Dhuhr", s: selectedDayRecord.dhuhr, sun: "sunnahDhuhr" },
+                                     { n: "Asr", s: selectedDayRecord.asr, sun: "sunnahAsr" },
+                                     { n: "Maghrib", s: selectedDayRecord.maghrib, sun: "sunnahMaghrib" },
+                                     { n: "Isha", s: selectedDayRecord.isha, sun: "sunnahIsha" },
+                                   ].map((pr) => (
+                                     <div key={pr.n} className="flex items-center justify-between group">
+                                        <div className="flex items-center gap-3">
+                                           <div className={`w-2 h-2 rounded-full ${pr.s === "Jamat" ? "bg-emerald-500" : pr.s === "Alone" ? "bg-sky-400" : "bg-rose-400"}`} />
+                                           <span className="text-sm font-black text-slate-900">{pr.n}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                           {selectedDayRecord[pr.sun] && <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                                           <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${pr.s === "Missed" ? "bg-rose-50 text-rose-600" : "bg-slate-50 text-slate-400"}`}>{pr.s}</span>
+                                        </div>
                                      </div>
-                                     <div className="flex items-center gap-3">
-                                        {selectedDayRecord[pr.sun] && <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
-                                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${pr.s === 'Missed' ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-slate-400'}`}>{pr.s}</span>
-                                     </div>
-                                  </div>
-                                ))}
-                             </div>
+                                   ))}
+                                </div>
 
-                             <div className="space-y-8">
-                                <div className="p-8 bg-slate-900 rounded-[2.5rem] relative overflow-hidden group">
-                                   <div className="relative z-10">
-                                      <p className="text-[9px] font-black text-sky-400 uppercase tracking-widest mb-4">Night Rituals</p>
-                                      <div className="space-y-4">
-                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-slate-400">Tahajjud</span>
-                                            {selectedDayRecord.tahajjud ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-3.5 h-3.5 text-slate-700" />}
-                                         </div>
-                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-slate-400">Witr Seal</span>
-                                            {selectedDayRecord.witr ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-3.5 h-3.5 text-slate-700" />}
+                                <div className="space-y-8">
+                                   <div className="p-8 bg-slate-900 rounded-[2.5rem] relative overflow-hidden group">
+                                      <div className="relative z-10">
+                                         <p className="text-[9px] font-black text-sky-400 uppercase tracking-widest mb-4">Night Rituals</p>
+                                         <div className="space-y-4">
+                                            <div className="flex items-center justify-between">
+                                               <span className="text-xs font-bold text-slate-400">Tahajjud</span>
+                                               {selectedDayRecord.tahajjud ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-3.5 h-3.5 text-slate-700" />}
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                               <span className="text-xs font-bold text-slate-400">Witr Seal</span>
+                                               {selectedDayRecord.witr ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-3.5 h-3.5 text-slate-700" />}
+                                            </div>
                                          </div>
                                       </div>
+                                      <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-sky-500/10 rounded-full blur-[40px]" />
                                    </div>
-                                   <div className="absolute top-[-20%] right-[-10%] w-24 h-24 bg-sky-500/10 rounded-full blur-[40px]" />
-                                </div>
 
-                                <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100/50">
-                                   <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Extra Merit</p>
-                                   <h5 className="text-2xl font-black text-emerald-900 leading-none">{selectedDayRecord.naflCount} <span className="text-[10px] text-emerald-600/60 uppercase tracking-tighter">Nafl Units</span></h5>
+                                   <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100/50">
+                                      <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-2">Extra Merit</p>
+                                      <h5 className="text-2xl font-black text-emerald-900 leading-none">{selectedDayRecord.naflCount} <span className="text-[10px] text-emerald-600/60 uppercase tracking-tighter">Nafl Units</span></h5>
+                                   </div>
                                 </div>
                              </div>
-                          </div>
+                           ) : (
+                             <div className="py-20 flex flex-col items-center justify-center text-center">
+                                <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
+                                   <Infinity className="w-10 h-10" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900 mb-2">Absolute Absence.</h3>
+                                <p className="text-slate-400 text-xs font-bold max-w-[240px] leading-relaxed uppercase tracking-widest">No spiritual record synchronized for this chronological node.</p>
+                                 {(selectedDateStr && new Date(selectedDateStr).toDateString() === new Date().toDateString()) && (
+                                   <Link href="/entry" className="mt-10 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[9px] uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all">
+                                      Initialize Protocol
+                                   </Link>
+                                 )}
+                             </div>
+                           )}
                        </div>
                     </motion.div>
                   </div>
