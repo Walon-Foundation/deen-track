@@ -4,10 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ScrollText, Sparkles, LogOut, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function LandingPage() {
   // Demo State for Authentication
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const { isSignedIn, user } = useUser()
+  const clerk = useClerk()
+  const router = useRouter()
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -31,13 +36,13 @@ export default function LandingPage() {
             {!isSignedIn ? (
               <>
                 <button 
-                  onClick={() => setIsSignedIn(true)}
+                  onClick={() => router.push("/sign-in")}
                   className="hidden sm:block text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
                 >
                   Log in
                 </button>
                 <button 
-                  onClick={() => setIsSignedIn(true)}
+                  onClick={() => router.push("/sign-up")}
                   className="text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full shadow-md shadow-slate-900/10 transition-all hover:scale-105 active:scale-95"
                 >
                   Get Started
@@ -49,12 +54,17 @@ export default function LandingPage() {
                   Dashboard
                 </Link>
                 
-                {/* User Avatar with Initial */}
+                {/* User Avatar */}
                 <button 
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-100 to-sky-200 border border-sky-300 flex items-center justify-center text-sky-700 font-bold text-lg hover:shadow-md transition-all relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:shadow-md transition-all relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
                 >
-                  O
+                  <Avatar className="w-full h-full border border-sky-200">
+                    <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
+                    <AvatarFallback className="bg-gradient-to-tr from-sky-100 to-sky-200 text-sky-700 font-bold text-lg">
+                      {user?.firstName?.charAt(0) || user?.emailAddresses?.[0]?.emailAddress?.charAt(0)?.toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
                 </button>
 
                 {/* Demo Profile Dropdown Menu */}
@@ -68,12 +78,19 @@ export default function LandingPage() {
                       className="absolute right-0 top-14 mt-2 w-64 bg-white/90 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-sky-900/10 border border-slate-100 overflow-hidden z-20 py-2"
                     >
                       <div className="px-5 py-4 border-b border-slate-100/80 mb-2 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-100 to-sky-200 flex items-center justify-center text-sky-700 font-bold text-lg">
-                          O
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900 leading-tight">Omar Khalid</p>
-                          <p className="text-[12px] text-slate-500 mt-0.5">omar@example.com</p>
+                        <Avatar className="w-10 h-10 border border-slate-200 shadow-sm">
+                          <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
+                          <AvatarFallback className="bg-gradient-to-tr from-sky-100 to-sky-200 text-sky-700 font-bold text-lg">
+                            {user?.firstName?.charAt(0) || user?.emailAddresses?.[0]?.emailAddress?.charAt(0)?.toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="overflow-hidden">
+                          <p className="text-sm font-bold text-slate-900 leading-tight truncate">
+                            {user?.fullName || "User"}
+                          </p>
+                          <p className="text-[12px] text-slate-500 mt-0.5 truncate">
+                            {user?.emailAddresses?.[0]?.emailAddress || "user@example.com"}
+                          </p>
                         </div>
                       </div>
                       
@@ -88,7 +105,7 @@ export default function LandingPage() {
 
                       <button 
                         onClick={() => {
-                          setIsSignedIn(false);
+                          clerk.signOut()
                           setShowProfileMenu(false);
                         }}
                         className="w-[calc(100%-16px)] text-left px-4 py-2.5 text-sm text-red-600 font-semibold hover:bg-red-50 flex items-center gap-2.5 transition-colors mx-2 rounded-xl mt-1"
@@ -142,7 +159,7 @@ export default function LandingPage() {
           >
             {!isSignedIn ? (
               <button 
-                onClick={() => setIsSignedIn(true)} 
+                onClick={() => router.push("/sign-in")} 
                 className="w-full sm:w-auto flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-400 text-white px-8 py-4 rounded-full text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-xl shadow-sky-500/30"
               >
                 Start Tracking Free
