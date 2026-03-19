@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Loader2, Sunrise, Sun, CloudSun, Sunset, Moon, Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import EntryLoading from "./loading";
 
 // Shadcn UI Imports
 import { Label } from "@/components/ui/label";
@@ -1003,8 +1004,8 @@ type EntryCategory = "Quran" | "Hadith" | "Dua" | "Knowledge" | "Salah";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>loadingg......</div>}>
-      <EntryPage/>
-     </Suspense>
-   )
- }
+    <Suspense fallback={<EntryLoading />}>
+      <EntryPage />
+    </Suspense>
+  );
+}
