@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Shadcn UI Imports
 import { Label } from "@/components/ui/label";
@@ -20,120 +20,120 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 const SURAHS = [
-  { name: "Al-Faatiha", verses: 7 },
-  { name: "Al-Baqara", verses: 286 },
-  { name: "Aal-i-Imraan", verses: 200 },
-  { name: "An-Nisaa", verses: 176 },
-  { name: "Al-Maaida", verses: 120 },
-  { name: "Al-An'aam", verses: 165 },
-  { name: "Al-A'raaf", verses: 206 },
-  { name: "Al-Anfaal", verses: 75 },
-  { name: "At-Tawba", verses: 129 },
-  { name: "Yunus", verses: 109 },
-  { name: "Hud", verses: 123 },
-  { name: "Yusuf", verses: 111 },
-  { name: "Ar-Ra'd", verses: 43 },
-  { name: "Ibrahim", verses: 52 },
-  { name: "Al-Hijr", verses: 99 },
-  { name: "An-Nahl", verses: 128 },
-  { name: "Al-Israa", verses: 111 },
-  { name: "Al-Kahf", verses: 110 },
-  { name: "Maryam", verses: 98 },
-  { name: "Taa-Haa", verses: 135 },
-  { name: "Al-Anbiyaa", verses: 112 },
-  { name: "Al-Hajj", verses: 78 },
-  { name: "Al-Muminoon", verses: 118 },
-  { name: "An-Noor", verses: 64 },
-  { name: "Al-Furqaan", verses: 77 },
-  { name: "Ash-Shu'araa", verses: 227 },
-  { name: "An-Naml", verses: 93 },
-  { name: "Al-Qasas", verses: 88 },
-  { name: "Al-Ankaboot", verses: 69 },
-  { name: "Ar-Room", verses: 60 },
-  { name: "Luqman", verses: 34 },
-  { name: "As-Sajda", verses: 30 },
-  { name: "Al-Ahzaab", verses: 73 },
-  { name: "Saba", verses: 54 },
-  { name: "Faatir", verses: 45 },
-  { name: "Yaseen", verses: 83 },
-  { name: "As-Saaffaat", verses: 182 },
-  { name: "Saad", verses: 88 },
-  { name: "Az-Zumar", verses: 75 },
-  { name: "Ghafir", verses: 85 },
-  { name: "Fussilat", verses: 54 },
-  { name: "Ash-Shura", verses: 53 },
-  { name: "Az-Zukhruf", verses: 89 },
-  { name: "Ad-Dukhaan", verses: 59 },
-  { name: "Al-Jaathiya", verses: 37 },
-  { name: "Al-Ahqaf", verses: 35 },
-  { name: "Muhammad", verses: 38 },
-  { name: "Al-Fath", verses: 29 },
-  { name: "Al-Hujuraat", verses: 18 },
-  { name: "Qaaf", verses: 45 },
-  { name: "Adh-Dhaariyat", verses: 60 },
-  { name: "At-Tur", verses: 49 },
-  { name: "An-Najm", verses: 62 },
-  { name: "Al-Qamar", verses: 55 },
-  { name: "Ar-Rahmaan", verses: 78 },
-  { name: "Al-Waaqia", verses: 96 },
-  { name: "Al-Hadid", verses: 29 },
-  { name: "Al-Mujaadila", verses: 22 },
-  { name: "Al-Hashr", verses: 24 },
-  { name: "Al-Mumtahana", verses: 13 },
-  { name: "As-Saff", verses: 14 },
-  { name: "Al-Jumu'a", verses: 11 },
-  { name: "Al-Munaafiqoon", verses: 11 },
-  { name: "At-Taghaabun", verses: 18 },
-  { name: "At-Talaaq", verses: 12 },
-  { name: "At-Tahrim", verses: 12 },
-  { name: "Al-Mulk", verses: 30 },
-  { name: "Al-Qalam", verses: 52 },
-  { name: "Al-Haaqqa", verses: 52 },
-  { name: "Al-Ma'aarij", verses: 44 },
-  { name: "Nooh", verses: 28 },
-  { name: "Al-Jinn", verses: 28 },
-  { name: "Al-Muzzammil", verses: 20 },
-  { name: "Al-Muddaththir", verses: 56 },
-  { name: "Al-Qiyaama", verses: 40 },
-  { name: "Al-Insaan", verses: 31 },
-  { name: "Al-Mursalaat", verses: 50 },
-  { name: "An-Naba", verses: 40 },
-  { name: "An-Naazi'aat", verses: 46 },
-  { name: "Abasa", verses: 42 },
-  { name: "At-Takwir", verses: 29 },
-  { name: "Al-Infitaar", verses: 19 },
-  { name: "Al-Mutaffifin", verses: 36 },
-  { name: "Al-Inshiqaaq", verses: 25 },
-  { name: "Al-Burooj", verses: 22 },
-  { name: "At-Taariq", verses: 17 },
-  { name: "Al-A'laa", verses: 19 },
-  { name: "Al-Ghaashiya", verses: 26 },
-  { name: "Al-Fajr", verses: 30 },
-  { name: "Al-Balad", verses: 20 },
-  { name: "Ash-Shams", verses: 15 },
-  { name: "Al-Lail", verses: 21 },
-  { name: "Ad-Dhuhaa", verses: 11 },
-  { name: "Ash-Sharh", verses: 8 },
-  { name: "At-Tin", verses: 8 },
-  { name: "Al-Alaq", verses: 19 },
-  { name: "Al-Qadr", verses: 5 },
-  { name: "Al-Bayyina", verses: 8 },
-  { name: "Az-Zalzala", verses: 8 },
-  { name: "Al-Aadiyaat", verses: 11 },
-  { name: "Al-Qaari'a", verses: 11 },
-  { name: "At-Takaathur", verses: 8 },
-  { name: "Al-Asr", verses: 3 },
-  { name: "Al-Humaza", verses: 9 },
-  { name: "Al-Fil", verses: 5 },
-  { name: "Quraish", verses: 4 },
-  { name: "Al-Maa'un", verses: 7 },
-  { name: "Al-Kawthar", verses: 3 },
-  { name: "Al-Kaafiroon", verses: 6 },
-  { name: "An-Nasr", verses: 3 },
-  { name: "Al-Masad", verses: 5 },
-  { name: "Al-Ikhlaas", verses: 4 },
-  { name: "Al-Falaq", verses: 5 },
-  { name: "An-Naas", verses: 6 },
+    { name: "Al-Faatiha", verses: 7 },
+    { name: "Al-Baqara", verses: 286 },
+    { name: "Aal-i-Imraan", verses: 200 },
+    { name: "An-Nisaa", verses: 176 },
+    { name: "Al-Maaida", verses: 120 },
+    { name: "Al-An'aam", verses: 165 },
+    { name: "Al-A'raaf", verses: 206 },
+    { name: "Al-Anfaal", verses: 75 },
+    { name: "At-Tawba", verses: 129 },
+    { name: "Yunus", verses: 109 },
+    { name: "Hud", verses: 123 },
+    { name: "Yusuf", verses: 111 },
+    { name: "Ar-Ra'd", verses: 43 },
+    { name: "Ibrahim", verses: 52 },
+    { name: "Al-Hijr", verses: 99 },
+    { name: "An-Nahl", verses: 128 },
+    { name: "Al-Israa", verses: 111 },
+    { name: "Al-Kahf", verses: 110 },
+    { name: "Maryam", verses: 98 },
+    { name: "Taa-Haa", verses: 135 },
+    { name: "Al-Anbiyaa", verses: 112 },
+    { name: "Al-Hajj", verses: 78 },
+    { name: "Al-Muminoon", verses: 118 },
+    { name: "An-Noor", verses: 64 },
+    { name: "Al-Furqaan", verses: 77 },
+    { name: "Ash-Shu'araa", verses: 227 },
+    { name: "An-Naml", verses: 93 },
+    { name: "Al-Qasas", verses: 88 },
+    { name: "Al-Ankaboot", verses: 69 },
+    { name: "Ar-Room", verses: 60 },
+    { name: "Luqman", verses: 34 },
+    { name: "As-Sajda", verses: 30 },
+    { name: "Al-Ahzaab", verses: 73 },
+    { name: "Saba", verses: 54 },
+    { name: "Faatir", verses: 45 },
+    { name: "Yaseen", verses: 83 },
+    { name: "As-Saaffaat", verses: 182 },
+    { name: "Saad", verses: 88 },
+    { name: "Az-Zumar", verses: 75 },
+    { name: "Ghafir", verses: 85 },
+    { name: "Fussilat", verses: 54 },
+    { name: "Ash-Shura", verses: 53 },
+    { name: "Az-Zukhruf", verses: 89 },
+    { name: "Ad-Dukhaan", verses: 59 },
+    { name: "Al-Jaathiya", verses: 37 },
+    { name: "Al-Ahqaf", verses: 35 },
+    { name: "Muhammad", verses: 38 },
+    { name: "Al-Fath", verses: 29 },
+    { name: "Al-Hujuraat", verses: 18 },
+    { name: "Qaaf", verses: 45 },
+    { name: "Adh-Dhaariyat", verses: 60 },
+    { name: "At-Tur", verses: 49 },
+    { name: "An-Najm", verses: 62 },
+    { name: "Al-Qamar", verses: 55 },
+    { name: "Ar-Rahmaan", verses: 78 },
+    { name: "Al-Waaqia", verses: 96 },
+    { name: "Al-Hadid", verses: 29 },
+    { name: "Al-Mujaadila", verses: 22 },
+    { name: "Al-Hashr", verses: 24 },
+    { name: "Al-Mumtahana", verses: 13 },
+    { name: "As-Saff", verses: 14 },
+    { name: "Al-Jumu'a", verses: 11 },
+    { name: "Al-Munaafiqoon", verses: 11 },
+    { name: "At-Taghaabun", verses: 18 },
+    { name: "At-Talaaq", verses: 12 },
+    { name: "At-Tahrim", verses: 12 },
+    { name: "Al-Mulk", verses: 30 },
+    { name: "Al-Qalam", verses: 52 },
+    { name: "Al-Haaqqa", verses: 52 },
+    { name: "Al-Ma'aarij", verses: 44 },
+    { name: "Nooh", verses: 28 },
+    { name: "Al-Jinn", verses: 28 },
+    { name: "Al-Muzzammil", verses: 20 },
+    { name: "Al-Muddaththir", verses: 56 },
+    { name: "Al-Qiyaama", verses: 40 },
+    { name: "Al-Insaan", verses: 31 },
+    { name: "Al-Mursalaat", verses: 50 },
+    { name: "An-Naba", verses: 40 },
+    { name: "An-Naazi'aat", verses: 46 },
+    { name: "Abasa", verses: 42 },
+    { name: "At-Takwir", verses: 29 },
+    { name: "Al-Infitaar", verses: 19 },
+    { name: "Al-Mutaffifin", verses: 36 },
+    { name: "Al-Inshiqaaq", verses: 25 },
+    { name: "Al-Burooj", verses: 22 },
+    { name: "At-Taariq", verses: 17 },
+    { name: "Al-A'laa", verses: 19 },
+    { name: "Al-Ghaashiya", verses: 26 },
+    { name: "Al-Fajr", verses: 30 },
+    { name: "Al-Balad", verses: 20 },
+    { name: "Ash-Shams", verses: 15 },
+    { name: "Al-Lail", verses: 21 },
+    { name: "Ad-Dhuhaa", verses: 11 },
+    { name: "Ash-Sharh", verses: 8 },
+    { name: "At-Tin", verses: 8 },
+    { name: "Al-Alaq", verses: 19 },
+    { name: "Al-Qadr", verses: 5 },
+    { name: "Al-Bayyina", verses: 8 },
+    { name: "Az-Zalzala", verses: 8 },
+    { name: "Al-Aadiyaat", verses: 11 },
+    { name: "Al-Qaari'a", verses: 11 },
+    { name: "At-Takaathur", verses: 8 },
+    { name: "Al-Asr", verses: 3 },
+    { name: "Al-Humaza", verses: 9 },
+    { name: "Al-Fil", verses: 5 },
+    { name: "Quraish", verses: 4 },
+    { name: "Al-Maa'un", verses: 7 },
+    { name: "Al-Kawthar", verses: 3 },
+    { name: "Al-Kaafiroon", verses: 6 },
+    { name: "An-Nasr", verses: 3 },
+    { name: "Al-Masad", verses: 5 },
+    { name: "Al-Ikhlaas", verses: 4 },
+    { name: "Al-Falaq", verses: 5 },
+    { name: "An-Naas", verses: 6 },
 ];
 
 const HADITH_COLLECTIONS: Record<string, number> = {
@@ -152,6 +152,7 @@ const HADITH_COLLECTIONS: Record<string, number> = {
 type EntryCategory = "Quran" | "Hadith" | "Dua" | "Knowledge";
 
 export default function EntryPage() {
+  const router = useRouter();
   const [entryCategory, setEntryCategory] = useState<EntryCategory>("Quran");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -223,7 +224,7 @@ export default function EntryPage() {
       
       const data = await res.json();
       if (data.ok) {
-        alert("Entry successfully logged!");
+        router.push("/dashboard");
       } else {
         alert("Error: " + data.message);
       }
@@ -247,9 +248,7 @@ export default function EntryPage() {
       
       const data = await res.json();
       if (data.ok) {
-        alert("Journal entry successfully logged!");
-        setJournalTitle("");
-        setJournalContent("");
+        router.push("/dashboard");
       } else {
         alert("Error: " + data.message);
       }
@@ -269,26 +268,7 @@ export default function EntryPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-sky-100 selection:text-sky-900">
-      {/* Modern NavBar - White/Grey mix */}
-      <header className="sticky top-0 w-full z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 group text-slate-500 hover:text-sky-600 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium tracking-tight">Return</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="text-base font-bold tracking-tight text-slate-900">
-              DeenTrack
-            </span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="max-w-2xl mx-auto px-6 pt-12 pb-32">
+      <main className="max-w-2xl mx-auto px-6 pt-32 pb-32">
         <div className="mb-10 text-center md:text-left">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 mb-2">
             Log Progress
@@ -299,7 +279,6 @@ export default function EntryPage() {
         </div>
 
         <Tabs defaultValue="entry" className="w-full">
-          {/* Subtly Elegant Tabs */}
           <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-slate-200/50 p-1 rounded-xl">
             <TabsTrigger
               value="entry"
@@ -315,7 +294,6 @@ export default function EntryPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Wrapper Card for form elements */}
           <div className="bg-white rounded-[1.5rem] shadow-sm border border-slate-200 p-6 md:p-8 w-full">
             <TabsContent
               value="entry"
@@ -327,7 +305,6 @@ export default function EntryPage() {
                 transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
-                {/* Category Segment Control (Elegant pills using Sky/Slate accent) */}
                 <div className="flex flex-wrap gap-2">
                   {categories.map((cat) => (
                     <button
