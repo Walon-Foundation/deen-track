@@ -6,6 +6,7 @@ export const goalTypeEnum = pgEnum("goal_type", ["Quran", "Hadith", "Dua"]);
 export const frequencyEnum = pgEnum("frequency", ["Daily", "Weekly"]);
 export const statusEnum = pgEnum("status", ["Read", "Memorized"]);
 export const languageEnum = pgEnum("language", ["Arabic", "English", "Both"]);
+export const knowledgeTypeEnum = pgEnum("knowledge_type", ["Seerah", "History", "Fiqh", "Tafsir", "General"]);
 
 // --- Tables ---
 export const userTable = pgTable("users", {
@@ -34,7 +35,8 @@ export const quranTable = pgTable("quran_entries", {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   userId: text("user_id").notNull().references(() => userTable.id, { onDelete: "cascade" }),
   surahName: text("surah_name").notNull(),
-  verseRange: text("verse_range").notNull(),
+  verseStart: integer("verse_start").notNull(),
+  verseEnd: integer("verse_end").notNull(),
   status: statusEnum("status").notNull().default("Read"),
   language: languageEnum("language").notNull().default("Arabic"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -73,4 +75,16 @@ export const journalTable = pgTable("journal_entries", {
   updatedAt: timestamp("updated_at").notNull().$onUpdateFn(() => new Date()),
 }, (table) => [
   index("journal_entries_user_id_idx").on(table.userId)
+]);
+
+// Table for tracking external Islamic knowledge (Seerah, History, Fiqh, etc.)
+export const knowledgeTable = pgTable("knowledge_entries", {
+  id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  userId: text("user_id").notNull().references(() => userTable.id, { onDelete: "cascade" }),
+  knowledgeType: knowledgeTypeEnum("knowledge_type").notNull().default("General"),
+  title: text("title").notNull(), 
+  notes: text("notes"), 
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("knowledge_entries_user_id_idx").on(table.userId)
 ]);

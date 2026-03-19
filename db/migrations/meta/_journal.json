@@ -8,6 +8,20 @@
       "when": 1773927463367,
       "tag": "0000_warm_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773929416818,
+      "tag": "0001_clammy_wild_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773930253294,
+      "tag": "0002_wandering_sleeper",
+      "breakpoints": true
     }
   ]
 }
