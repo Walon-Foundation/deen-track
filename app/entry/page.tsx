@@ -164,14 +164,22 @@ export default function EntryPage() {
 
   // Dua States
   const [duaCategory, setDuaCategory] = useState<string>("General");
+  const [duaCount, setDuaCount] = useState<number>(1);
 
   // Hadith States
   const [hadithCollection, setHadithCollection] = useState<string>("");
   const [hadithBook, setHadithBook] = useState<string>("");
   const [hadithNumber, setHadithNumber] = useState<string>("");
+  const [hadithReflection, setHadithReflection] = useState<string>("");
 
   // Knowledge States
-  const [knowledgeType, setKnowledgeType] = useState("General");
+  const [knowledgeType, setKnowledgeType] = useState<string>("General");
+  const [knowledgeTitle, setKnowledgeTitle] = useState<string>("");
+  const [knowledgeNotes, setKnowledgeNotes] = useState<string>("");
+
+  // Journal States
+  const [journalTitle, setJournalTitle] = useState<string>("");
+  const [journalContent, setJournalContent] = useState<string>("");
 
   const selectedSurahInfo = SURAHS.find((s) => s.name === quranSurahName);
   const verseCountArray = selectedSurahInfo
@@ -185,13 +193,71 @@ export default function EntryPage() {
     ? Array.from({ length: maxHadithBooks }, (_, i) => (i + 1).toString())
     : [];
 
-  const submitForm = (e: React.FormEvent) => {
+  const submitEntryForm = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      alert("Entry successfully logged!");
+    
+    try {
+      let endpoint = "";
+      let payload = {};
+
+      if (entryCategory === "Quran") {
+        endpoint = "/api/entry/quran";
+        payload = { surahName: quranSurahName, verseStart: quranStartVerse, verseEnd: quranEndVerse, status: quranStatus, language: quranLang };
+      } else if (entryCategory === "Hadith") {
+        endpoint = "/api/entry/hadith";
+        payload = { scholar: hadithCollection, book: hadithBook, hadithName: hadithNumber, understanding: hadithReflection };
+      } else if (entryCategory === "Dua") {
+        endpoint = "/api/entry/dua";
+        payload = { category: duaCategory, count: duaCount };
+      } else if (entryCategory === "Knowledge") {
+        endpoint = "/api/entry/knowledge";
+        payload = { knowledgeType, title: knowledgeTitle, notes: knowledgeNotes };
+      }
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await res.json();
+      if (data.ok) {
+        alert("Entry successfully logged!");
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      alert("Failed to save entry.");
+    } finally {
       setIsSubmitting(false);
-    }, 600);
+    }
+  };
+
+  const submitJournalForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const res = await fetch("/api/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: journalTitle, content: journalContent })
+      });
+      
+      const data = await res.json();
+      if (data.ok) {
+        alert("Journal entry successfully logged!");
+        setJournalTitle("");
+        setJournalContent("");
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (err) {
+      alert("Failed to save journal.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const categories: { id: EntryCategory; label: string }[] = [
@@ -282,7 +348,7 @@ export default function EntryPage() {
                   ))}
                 </div>
 
-                <form onSubmit={submitForm} className="space-y-8">
+                <form onSubmit={submitEntryForm} className="space-y-8">
                   <AnimatePresence mode="popLayout">
                     {/* QURAN */}
                     {entryCategory === "Quran" && (
@@ -535,6 +601,8 @@ export default function EntryPage() {
                             Personal Reflection
                           </Label>
                           <Textarea
+                            value={hadithReflection}
+                            onChange={(e) => setHadithReflection(e.target.value)}
                             placeholder="What did you learn from this narration?"
                             className="min-h-[120px] bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base resize-y shadow-sm"
                           />
@@ -590,9 +658,10 @@ export default function EntryPage() {
                             Count Tracked
                           </Label>
                           <Input
+                            value={duaCount}
+                            onChange={(e) => setDuaCount(Math.max(1, parseInt(e.target.value) || 1))}
                             type="number"
                             min="1"
-                            defaultValue="1"
                             className="h-11 bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base shadow-sm"
                             required
                           />
@@ -644,6 +713,8 @@ export default function EntryPage() {
                             Book Title / Subject
                           </Label>
                           <Input
+                            value={knowledgeTitle}
+                            onChange={(e) => setKnowledgeTitle(e.target.value)}
                             placeholder="e.g. The Sealed Nectar"
                             className="h-11 bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base shadow-sm"
                             required
@@ -654,6 +725,8 @@ export default function EntryPage() {
                             Study Notes
                           </Label>
                           <Textarea
+                            value={knowledgeNotes}
+                            onChange={(e) => setKnowledgeNotes(e.target.value)}
                             placeholder="Enter your key takeaways learned today..."
                             className="min-h-[120px] bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base resize-y shadow-sm"
                           />
@@ -691,12 +764,14 @@ export default function EntryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <form onSubmit={submitForm} className="space-y-6">
+                <form onSubmit={submitJournalForm} className="space-y-6">
                   <div className="space-y-2">
                     <Label className="text-slate-700 font-medium">
                       Journal Title
                     </Label>
                     <Input
+                      value={journalTitle}
+                      onChange={(e) => setJournalTitle(e.target.value)}
                       placeholder="e.g. A reflection on patience"
                       className="h-11 bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base shadow-sm"
                     />
@@ -704,6 +779,8 @@ export default function EntryPage() {
                   <div className="space-y-2">
                     <Label className="text-slate-700 font-medium">Entry</Label>
                     <Textarea
+                      value={journalContent}
+                      onChange={(e) => setJournalContent(e.target.value)}
                       placeholder="What did you learn today, or what are you pondering?..."
                       className="min-h-[240px] bg-white border-slate-200 rounded-lg focus-visible:ring-sky-500 text-base resize-y shadow-sm"
                       required
