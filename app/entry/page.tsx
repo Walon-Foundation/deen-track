@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Loader2, Sunrise, Sun, CloudSun, Sunset, Moon, Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -152,9 +152,10 @@ const HADITH_COLLECTIONS: Record<string, number> = {
 
 type EntryCategory = "Quran" | "Hadith" | "Dua" | "Knowledge" | "Salah";
 
-export default function EntryPage() {
+//@ts-ignore
+ function EntryPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams()
   const [entryCategory, setEntryCategory] = useState<EntryCategory>("Quran");
 
   useEffect(() => {
@@ -998,4 +999,12 @@ export default function EntryPage() {
       </main>
     </div>
   );
-}
+ }
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>loadingg......</div>}>
+      <EntryPage/>
+     </Suspense>
+   )
+ }
