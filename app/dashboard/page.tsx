@@ -106,12 +106,12 @@ export default function DashboardPage() {
   const renderContent = () => {
     if (isLoading && !data) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
                 <div className="relative">
-                    <div className="w-12 h-12 border-4 border-sky-100 border-t-sky-500 rounded-full animate-spin" />
-                    <Brain className="w-6 h-6 text-sky-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    <div className="w-10 h-10 border-4 border-sky-100 border-t-sky-500 rounded-full animate-spin" />
+                    <Brain className="w-5 h-5 text-sky-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
-                <p className="text-sm font-bold text-slate-400 animate-pulse uppercase tracking-[0.2em]">Synthesizing Insights</p>
+                <p className="text-[10px] font-black text-slate-400 animate-pulse uppercase tracking-[0.2em]">Synthesizing Insights</p>
             </div>
         );
     }
@@ -119,21 +119,21 @@ export default function DashboardPage() {
     switch (activeNav) {
       case "overview":
         return (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <section className="mb-10">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
+             <section className="mb-6 sm:mb-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
                   <div>
-                     <h2 className="text-sm font-black text-sky-500 uppercase tracking-[0.2em] mb-3">Spiritual Command Center</h2>
-                     <h1 className="text-4xl sm:text-5xl font-black tracking-tighter text-slate-900 leading-none">
+                     <h2 className="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em] mb-1 sm:mb-3">Spiritual Command Center</h2>
+                     <h1 className="text-3xl sm:text-5xl font-black tracking-tighter text-slate-900 leading-none">
                        Salam, {user?.firstName}
                      </h1>
                   </div>
-                  <div className="bg-white border border-slate-200/60 p-1 rounded-2xl shadow-sm flex items-center gap-1 overflow-hidden">
+                  <div className="bg-white border border-slate-200/60 p-1 rounded-xl sm:rounded-2xl shadow-sm flex items-center gap-0.5 overflow-hidden self-start sm:self-auto">
                      {["7D", "30D", "1Y"].map((range) => (
                         <button 
                           key={range} 
                           onClick={() => setTimeRange(range)}
-                          className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${timeRange === range ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-900"}`}
+                          className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-black rounded-lg sm:rounded-xl transition-all ${timeRange === range ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-900"}`}
                         >
                           {range}
                         </button>
@@ -142,37 +142,39 @@ export default function DashboardPage() {
                 </div>
              </section>
 
-             <section className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+             <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-10">
                {statCards.map((card, i) => (
-                  <div key={i} className="bg-white border border-slate-200/50 p-6 rounded-[2.5rem] shadow-sm group hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500 border-b-4 border-b-transparent hover:border-b-sky-500">
-                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-6 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                        <span className={card.iconColor}>{card.icon}</span>
+                  <div key={i} className="bg-white border border-slate-200/50 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm group hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500 border-b-2 sm:border-b-4 border-b-transparent hover:border-b-sky-500 flex flex-col justify-between">
+                     <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 sm:mb-6 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                        <span className={`${card.iconColor} p-0.5`}>{card.icon}</span>
                      </div>
-                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{card.label}</p>
-                     <div className="flex items-center gap-2">
-                        <h4 className="text-3xl font-black text-slate-900">{card.value}</h4>
-                        <div className="bg-emerald-50 text-emerald-600 p-1 rounded-lg">
-                          <ArrowUpRight className="w-3 h-3" />
+                     <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5 sm:mb-1">{card.label}</p>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                           <h4 className="text-xl sm:text-3xl font-black text-slate-900 leading-none">{card.value}</h4>
+                           <div className="bg-emerald-50 text-emerald-600 p-0.5 rounded-md">
+                             <ArrowUpRight className="w-2 sm:w-3 h-2 sm:h-3" />
+                           </div>
                         </div>
                      </div>
                   </div>
                ))}
              </section>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10 mb-20">
-                <div className="lg:col-span-2 bg-white border border-slate-200/50 rounded-[3rem] p-8 sm:p-10 shadow-sm relative overflow-hidden group">
-                     <div className="flex items-center justify-between mb-10 relative z-10">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10 mb-10">
+                <div className="lg:col-span-2 bg-white border border-slate-200/50 rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-10 shadow-sm relative overflow-hidden group">
+                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10 relative z-10 gap-3">
                         <div>
-                           <h3 className="text-2xl font-black text-slate-900 tracking-tight">Focus & Discipline</h3>
-                           <p className="text-sm font-bold text-slate-400">Activity density for the past {timeRange} range</p>
+                           <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Focus & Discipline</h3>
+                           <p className="text-[10px] sm:text-sm font-bold text-slate-400 uppercase tracking-tighter">Activity density ({timeRange})</p>
                         </div>
-                        <div className="bg-sky-50 px-4 py-2 rounded-2xl flex items-center gap-2 text-sky-600">
-                           <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
-                           <span className="text-[10px] font-black uppercase tracking-widest leading-none">Live Analytics</span>
+                        <div className="bg-sky-50 px-3 py-1.5 rounded-xl flex items-center gap-2 text-sky-600">
+                           <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                           <span className="text-[9px] font-black uppercase tracking-widest leading-none">Live Analytics</span>
                         </div>
                      </div>
 
-                     <div className="h-[340px] w-full relative z-10">
+                     <div className="h-[220px] sm:h-[340px] w-full relative z-10 -ml-2">
                         <ResponsiveContainer width="100%" height="100%">
                            <AreaChart data={chartData}>
                               <defs>
@@ -181,24 +183,24 @@ export default function DashboardPage() {
                                     <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
                                  </linearGradient>
                               </defs>
-                              <CartesianGrid strokeDasharray="6 6" vertical={false} stroke="#F1F5F9" />
+                              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F1F5F9" />
                               <XAxis 
                                  dataKey="day" 
                                  axisLine={false} 
                                  tickLine={false} 
-                                 tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 900}}
-                                 dy={15}
+                                 tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 900}}
+                                 dy={10}
                               />
                               <YAxis hide domain={[0, 'auto']} />
                               <Tooltip 
-                                 cursor={{ stroke: '#0ea5e9', strokeWidth: 2, strokeDasharray: '4 4' }}
-                                 contentStyle={{ borderRadius: '24px', border: '1px solid #F1F5F9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.05)' }}
+                                 cursor={{ stroke: '#0ea5e9', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+                                 contentStyle={{ borderRadius: '16px', border: '1px solid #F1F5F9', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.05)', fontSize: '12px' }}
                               />
                               <Area 
                                  type="monotone" 
                                  dataKey="entries" 
                                  stroke="#0ea5e9" 
-                                 strokeWidth={4} 
+                                 strokeWidth={3} 
                                  fill="url(#proGradient)" 
                                  animationDuration={1000}
                               />
@@ -207,33 +209,36 @@ export default function DashboardPage() {
                      </div>
                 </div>
 
-                <div className="space-y-8">
-                   <div className="bg-white border border-slate-200/50 rounded-[3rem] p-8 shadow-sm">
-                      <div className="flex items-center justify-between mb-8">
-                         <h3 className="text-xl font-black text-slate-900 tracking-tight">Recent Activity</h3>
-                         <History className="w-5 h-5 text-slate-300" />
+                <div className="space-y-6 sm:space-y-8">
+                   <div className="bg-white border border-slate-200/50 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 shadow-sm">
+                      <div className="flex items-center justify-between mb-6 sm:mb-8">
+                         <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Recent Logs</h3>
+                         <History className="w-4 sm:w-5 h-4 sm:h-5 text-slate-300" />
                       </div>
-                      <div className="space-y-6">
+                      <div className="space-y-5">
                         {data?.recent?.map((item) => (
-                          <div key={item.id} className="flex gap-4 group cursor-help">
-                             <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-sky-50 group-hover:border-sky-100 transition-colors">
+                          <div key={item.id} className="flex gap-3 sm:gap-4 group cursor-help">
+                             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-sky-50 group-hover:border-sky-100 transition-colors shrink-0">
                                 {item.type === 'Quran' ? <BookOpen className="w-4 h-4 text-sky-600" /> : <Star className="w-4 h-4 text-amber-600" />}
                              </div>
-                             <div className="flex-1 min-w-0 pt-1">
-                                <p className="text-sm font-black text-slate-900 truncate mb-1">{item.title}</p>
-                                <p className="text-xs font-bold text-slate-400">{item.detail}</p>
+                             <div className="flex-1 min-w-0 pt-0.5">
+                                <p className="text-xs sm:text-sm font-black text-slate-900 truncate mb-0.5 sm:mb-1">{item.title}</p>
+                                <p className="text-[10px] sm:text-xs font-bold text-slate-400 capitalize">{item.detail}</p>
                              </div>
                           </div>
                         ))}
+                        {(!data?.recent || data.recent.length === 0) && (
+                            <p className="text-xs font-bold text-slate-300 text-center py-4">No data yet.</p>
+                        )}
                       </div>
                    </div>
 
-                   <div className="bg-slate-900 rounded-[3rem] p-8 shadow-2xl relative overflow-hidden group">
-                      <Quote className="w-8 h-8 text-sky-500/30 mb-4" />
-                      <p className="text-lg font-black text-white leading-tight mb-4 tracking-tight">
-                        Quality over quantity. A small deed done consistently is better than a mountain of deeds done once.
+                   <div className="bg-slate-900 rounded-[2rem] sm:rounded-[3rem] p-8 shadow-2xl relative overflow-hidden group">
+                      <Quote className="w-6 h-6 text-sky-500/30 mb-4" />
+                      <p className="text-base sm:text-lg font-black text-white leading-tight mb-4 tracking-tight">
+                        Quality over quantity. A small deed done consistently is better than a mountain of deeds.
                       </p>
-                      <button onClick={() => setActiveNav("vault")} className="text-xs font-black text-sky-500 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
+                      <button onClick={() => setActiveNav("vault")} className="text-[10px] font-black text-sky-500 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
                         Explore Vault <ChevronRight className="w-3 h-3" />
                       </button>
                    </div>
@@ -244,28 +249,28 @@ export default function DashboardPage() {
       case "vault":
       case "journal":
         return (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="flex items-center justify-between mb-10">
-                <h1 className="text-4xl font-black text-slate-900 lowercase tracking-tighter">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
+             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10 gap-6">
+                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 lowercase tracking-tighter">
                    {activeNav === "vault" ? "history_vault" : "my_journal"}.
                 </h1>
-                <div className="flex gap-4">
-                   <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Search entries..." />
+                <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
+                   <div className="relative flex-1 sm:flex-none">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Search..." />
                    </div>
-                   <button className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
-                      <Filter className="w-4 h-4 text-slate-600" />
+                   <button className="p-2 sm:p-2.5 bg-white border border-slate-200 rounded-lg sm:rounded-xl hover:bg-slate-50 shrink-0">
+                      <Filter className="w-3.5 h-3.5 text-slate-600" />
                    </button>
                 </div>
              </div>
              
-             <div className="bg-white border border-slate-200/50 rounded-[3rem] p-20 flex flex-col items-center justify-center text-center shadow-sm">
-                <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6">
-                   <Library className="w-10 h-10 text-slate-200" />
+             <div className="bg-white border border-slate-200/50 rounded-[2rem] sm:rounded-[3rem] p-12 sm:p-20 flex flex-col items-center justify-center text-center shadow-sm">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mb-6">
+                   <Library className="w-8 h-8 sm:w-10 sm:h-10 text-slate-200" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">Populating Records...</h3>
-                <p className="text-slate-400 font-bold text-sm max-w-xs leading-relaxed">
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-2">Populating Records...</h3>
+                <p className="text-slate-400 font-bold text-xs sm:text-sm max-w-xs leading-relaxed">
                    We're indexing your collective spiritual data to build a comprehensive history vault.
                 </p>
              </div>
@@ -279,7 +284,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex overflow-hidden">
       
-      {/* SIDEBAR */}
+      {/* SIDEBAR (Desktop) */}
       <aside className="hidden lg:flex w-72 bg-white border-r border-slate-200/60 flex-col sticky top-0 h-screen z-40">
         <div className="p-8 pb-10">
           <Link href="/" className="flex items-center gap-3">
@@ -325,40 +330,46 @@ export default function DashboardPage() {
       {/* CONTENT AREA */}
       <div className="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth bg-slate-50/30">
         
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/40 px-6 sm:px-10 h-20 shrink-0 flex items-center justify-between">
-            <p className="hidden lg:block text-sm font-black text-slate-400 uppercase tracking-widest">{activeNav}</p>
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/40 px-4 sm:px-10 h-16 sm:h-20 shrink-0 flex items-center justify-between">
+            <p className="hidden lg:block text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{activeNav}</p>
             <div className="lg:hidden flex items-center gap-2">
-               <div className="bg-sky-500 p-1.5 rounded-lg">
+               <Link href="/" className="bg-sky-500 p-1.5 rounded-lg">
                  <Brain className="w-4 h-4 text-white" />
-               </div>
-               <span className="font-black text-slate-900">DeenTrack</span>
+               </Link>
+               <span className="text-base font-black text-slate-900 tracking-tighter leading-none">DeenTrack</span>
             </div>
 
-            <div className="flex items-center gap-4">
-               <Link href="/entry" className="hidden sm:flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-md shadow-sky-500/10 transition-all hover:scale-105 active:scale-95">
+            <div className="flex items-center gap-2 sm:gap-4">
+               <Link href="/entry" className="flex items-center gap-1.5 sm:gap-2 bg-sky-500 hover:bg-sky-600 text-white px-2.5 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm font-bold shadow-md shadow-sky-500/10 transition-all hover:scale-105 active:scale-95 shrink-0">
                   <Plus className="w-4 h-4" />
-                  New Entry
+                  <span className="hidden min-[400px]:inline">New Entry</span>
+                  <span className="hidden min-[360px]:inline min-[400px]:hidden">Entry</span>
                </Link>
-               <Avatar className="w-10 h-10 border-2 border-white shadow-sm ml-2">
+               <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-white shadow-sm ml-1 sm:ml-2">
                   <AvatarImage src={user?.imageUrl} />
-                  <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="bg-sky-50 text-sky-600 text-xs font-black">{user?.firstName?.charAt(0)}</AvatarFallback>
                </Avatar>
             </div>
         </header>
 
-        <main className="flex-1 p-6 sm:p-10 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-10 max-w-7xl mx-auto w-full">
            {renderContent()}
         </main>
         
-        {/* MOBILE NAV */}
-        <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-xl border-t border-slate-200/60 h-20 px-4 flex items-center justify-around z-50">
+        {/* MOBILE NAV (Bottom Tab Bar) */}
+        <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-xl border-t border-slate-200/60 h-16 sm:h-20 px-4 flex items-center justify-around z-50">
             {sidebarLinks.map((link) => (
                <button 
                   key={link.id} 
                   onClick={() => setActiveNav(link.id)}
                   className={`flex flex-col items-center gap-1 transition-all ${activeNav === link.id ? "text-sky-600 scale-110" : "text-slate-400 opacity-60"}`}
                >
-                  {link.icon}
+                  <div className={activeNav === link.id ? "text-sky-500" : ""}>
+                    {link.icon}
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${activeNav === link.id ? "text-sky-600" : "text-slate-400"}`}>
+                    {link.id === "overview" ? "Home" : link.id === "journal" ? "Log" : link.id === "vault" ? "Vault" : "Pref"}
+                  </span>
                </button>
             ))}
         </div>
