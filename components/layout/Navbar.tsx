@@ -74,9 +74,6 @@ export function Navbar() {
                 <Link href="/discovery" className="p-2 text-slate-400 hover:text-sky-500 transition-colors">
                   <Brain className="w-6 h-6" />
                 </Link>
-                <Link href="/dashboard" className="p-2 text-slate-500 hover:text-sky-600 transition-colors">
-                  <LayoutDashboard className="w-6 h-6" />
-                </Link>
                 <Link href="/entry" className="p-2 text-sky-500 transition-colors">
                   <PlusCircle className="w-6 h-6" />
                 </Link>
