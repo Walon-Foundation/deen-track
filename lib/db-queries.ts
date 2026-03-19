@@ -136,8 +136,6 @@ export async function getWeeklyActivityChart(userId: string, range: string = "7d
          ? d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
          : d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
-     // For 1Y, we only want one entry per month
-
      if (lookbackDays > 30) {
       //@ts-ignore
         if (!chartData.find(cd => cd.day === label)) {
@@ -153,4 +151,28 @@ export async function getWeeklyActivityChart(userId: string, range: string = "7d
   }
 
   return chartData;
+}
+
+export async function getAllUserRecords(userId: string, page: number = 1, limit: number = 20) {
+  const offset = (page - 1) * limit;
+
+  const [quran, hadith, dua, knowledge, journal] = await Promise.all([
+    db.select().from(quranTable).where(eq(quranTable.userId, userId)).orderBy(desc(quranTable.createdAt)).limit(offset + limit),
+    db.select().from(hadithTable).where(eq(hadithTable.userId, userId)).orderBy(desc(hadithTable.createdAt)).limit(offset + limit),
+    db.select().from(duaTable).where(eq(duaTable.userId, userId)).orderBy(desc(duaTable.createdAt)).limit(offset + limit),
+    db.select().from(knowledgeTable).where(eq(knowledgeTable.userId, userId)).orderBy(desc(knowledgeTable.createdAt)).limit(offset + limit),
+    db.select().from(journalTable).where(eq(journalTable.userId, userId)).orderBy(desc(journalTable.createdAt)).limit(offset + limit),
+  ]);
+
+  const normalized = [
+    ...quran.map(q => ({ id: q.id, type: 'Quran', title: q.surahName, detail: `Verses ${q.verseStart}-${q.verseEnd}`, date: q.createdAt, content: q.status })),
+    ...hadith.map(h => ({ id: h.id, type: 'Hadith', title: h.scholar, detail: `${h.book} - #${h.hadithName}`, date: h.createdAt, content: h.understanding })),
+    ...dua.map(d => ({ id: d.id, type: 'Dua', title: d.category, detail: `${d.count} Recitations`, date: d.createdAt, content: null })),
+    ...knowledge.map(k => ({ id: k.id, type: 'Knowledge', title: k.title, detail: k.knowledgeType, date: k.createdAt, content: k.notes })),
+    ...journal.map(j => ({ id: j.id, type: 'Journal', title: j.title || 'Personal Reflection', detail: 'Reflection', date: j.createdAt, content: j.content })),
+  ]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(offset, offset + limit);
+
+  return normalized;
 }

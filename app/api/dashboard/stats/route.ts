@@ -26,7 +26,10 @@ export async function GET(req: NextRequest) {
       getWeeklyActivityChart(user.id, range)
     ]);
 
-    return NextResponse.json({ ok: true, stats, recent, chart }, { status: 200 });
+    // Simple sum of today's entry count for milestone detection
+    const todayCount = chart[chart.length - 1]?.entries || 0;
+
+    return NextResponse.json({ ok: true, stats, recent, chart, todayCount }, { status: 200 });
   } catch (err) {
     console.error("[DASHBOARD_STATS_ERROR]", err);
     return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });

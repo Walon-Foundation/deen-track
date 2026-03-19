@@ -60,10 +60,11 @@ export default function DashboardPage() {
   const { user, isLoaded: isUserLoaded } = useUser();
   const [activeNav, setActiveNav] = useState("overview");
   const [timeRange, setTimeRange] = useState("7D");
-  const [data, setData] = useState<DashboardStats | null>(null);
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [discoveryContent, setDiscoveryContent] = useState<any>(null);
   const [isDiscoveryLoading, setIsDiscoveryLoading] = useState(true);
+  const [showMilestone, setShowMilestone] = useState(false);
 
   useEffect(() => {
     async function fetchDiscovery() {
@@ -88,11 +89,13 @@ export default function DashboardPage() {
         const res = await fetch(`/api/dashboard/stats?range=${timeRange.toLowerCase()}`);
         const json = await res.json();
         if (json.ok) {
-          setData({
-            stats: json.stats,
-            recent: json.recent,
-            chart: json.chart,
-          });
+          setData(json);
+          // Milestone Logic: Show if 5+ entries today and not shown in current session
+          const hasShown = sessionStorage.getItem(`milestone_${new Date().toDateString()}`);
+          if (json.todayCount >= 5 && !hasShown) {
+             setShowMilestone(true);
+             sessionStorage.setItem(`milestone_${new Date().toDateString()}`, "true");
+          }
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
@@ -102,6 +105,39 @@ export default function DashboardPage() {
     }
     if (isUserLoaded) fetchStats();
   }, [isUserLoaded, timeRange]);
+
+  const Confetti = () => (
+    <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center overflow-hidden">
+       {Array.from({ length: 40 }).map((_, i) => (
+         <motion.div
+           key={i}
+           initial={{ 
+             opacity: 1, 
+             scale: Math.random() * 0.5 + 0.5, 
+             x: 0, 
+             y: 0,
+             rotate: 0 
+           }}
+           animate={{ 
+             opacity: 0, 
+             x: (Math.random() - 0.5) * 600, 
+             y: (Math.random() - 0.5) * 600 - 200,
+             rotate: Math.random() * 360,
+             scale: 0
+           }}
+           transition={{ 
+             duration: 3, 
+             ease: "easeOut",
+             delay: Math.random() * 0.5
+           }}
+           className="absolute w-3 h-3 rounded-sm"
+           style={{ 
+             backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#6366f1'][i % 4] 
+           }}
+         />
+       ))}
+    </div>
+  );
 
   if (!isUserLoaded) return null;
 
@@ -120,6 +156,52 @@ export default function DashboardPage() {
     { id: "vault", label: "History Vault", icon: <Library className="w-5 h-5" /> },
     { id: "settings", label: "Preferences", icon: <Settings className="w-5 h-5" /> },
   ];
+
+  const [vaultData, setVaultData] = useState<any[]>([]);
+  const [isVaultLoading, setIsVaultLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    async function fetchVault() {
+      if (activeNav === "journal" || activeNav === "vault") {
+        setIsVaultLoading(true);
+        try {
+          const res = await fetch(`/api/dashboard/vault?page=${page}&limit=10`);
+          const json = await res.json();
+          if (json.ok) {
+            if (page === 1) {
+              setVaultData(json.data);
+            } else {
+              setVaultData(prev => [...prev, ...json.data]);
+            }
+            if (json.data.length < 10) setHasMore(false);
+            else setHasMore(true);
+          }
+        } catch (err) {
+          console.error("Vault fetch error:", err);
+        } finally {
+          setIsVaultLoading(false);
+        }
+      }
+    }
+    if (isUserLoaded) fetchVault();
+  }, [activeNav, isUserLoaded, page]);
+
+  // Reset page when switching tabs
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+  }, [activeNav]);
+
+  const filteredVault = (vaultData || []).filter((item: any) => {
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    if (activeNav === "journal") return item.type === "Journal" && matchesSearch;
+    return matchesSearch;
+  });
 
   const renderContent = () => {
     if (isLoading && !data) {
@@ -148,8 +230,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-white border border-slate-200/60 p-1 rounded-xl sm:rounded-2xl shadow-sm flex items-center gap-0.5 overflow-hidden self-start sm:self-auto">
                      {["7D", "30D", "1Y"].map((range) => (
-                        <button 
-                          key={range} 
+                        <button
+                          key={range}
                           onClick={() => setTimeRange(range)}
                           className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-black rounded-lg sm:rounded-xl transition-all ${timeRange === range ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-900"}`}
                         >
@@ -202,24 +284,24 @@ export default function DashboardPage() {
                                  </linearGradient>
                               </defs>
                               <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#F1F5F9" />
-                              <XAxis 
-                                 dataKey="day" 
-                                 axisLine={false} 
-                                 tickLine={false} 
+                              <XAxis
+                                 dataKey="day"
+                                 axisLine={false}
+                                 tickLine={false}
                                  tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 900}}
                                  dy={10}
                               />
                               <YAxis hide domain={[0, 'auto']} />
-                              <Tooltip 
+                              <Tooltip
                                  cursor={{ stroke: '#0ea5e9', strokeWidth: 1.5, strokeDasharray: '4 4' }}
                                  contentStyle={{ borderRadius: '16px', border: '1px solid #F1F5F9', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.05)', fontSize: '12px' }}
                               />
-                              <Area 
-                                 type="monotone" 
-                                 dataKey="entries" 
-                                 stroke="#0ea5e9" 
-                                 strokeWidth={3} 
-                                 fill="url(#proGradient)" 
+                              <Area
+                                 type="monotone"
+                                 dataKey="entries"
+                                 stroke="#0ea5e9"
+                                 strokeWidth={3}
+                                 fill="url(#proGradient)"
                                  animationDuration={1000}
                               />
                            </AreaChart>
@@ -234,7 +316,7 @@ export default function DashboardPage() {
                          <History className="w-4 sm:w-5 h-4 sm:h-5 text-slate-300" />
                       </div>
                       <div className="space-y-5">
-                        {data?.recent?.map((item) => (
+                        {data?.recent?.map((item: any) => (
                           <div key={item.id} className="flex gap-3 sm:gap-4 group cursor-help">
                              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-sky-50 group-hover:border-sky-100 transition-colors shrink-0">
                                 {item.type === 'Quran' ? <BookOpen className="w-4 h-4 text-sky-600" /> : <Star className="w-4 h-4 text-amber-600" />}
@@ -261,7 +343,7 @@ export default function DashboardPage() {
                            </div>
                            <Quote className="w-5 h-5 text-sky-500/30" />
                         </div>
-                        
+
                         {isDiscoveryLoading ? (
                            <div className="space-y-3">
                               <div className="h-4 w-full bg-white/5 animate-pulse rounded" />
@@ -292,34 +374,129 @@ export default function DashboardPage() {
              </div>
           </div>
         );
-       case "vault":
       case "journal":
+      case "vault":
         return (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10 gap-6">
-                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 lowercase tracking-tighter">
-                   {activeNav === "vault" ? "history_vault" : "my_journal"}.
-                </h1>
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-black text-slate-900 lowercase tracking-tighter">
+                    {activeNav === "vault" ? "history_vault" : "my_journal"}.
+                  </h1>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">{filteredVault.length} Entries found</p>
+                </div>
                 <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
                    <div className="relative flex-1 sm:flex-none">
                       <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Search..." />
+                      <input
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="Search your records..."
+                      />
                    </div>
                    <button className="p-2 sm:p-2.5 bg-white border border-slate-200 rounded-lg sm:rounded-xl hover:bg-slate-50 shrink-0">
                       <Filter className="w-3.5 h-3.5 text-slate-600" />
                    </button>
                 </div>
              </div>
-             
-             <div className="bg-white border border-slate-200/50 rounded-[2rem] sm:rounded-[3rem] p-12 sm:p-20 flex flex-col items-center justify-center text-center shadow-sm">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mb-6">
-                   <Library className="w-8 h-8 sm:w-10 sm:h-10 text-slate-200" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-2">Populating Records...</h3>
-                <p className="text-slate-400 font-bold text-xs sm:text-sm max-w-xs leading-relaxed">
-                   We're indexing your collective spiritual data to build a comprehensive history vault.
-                </p>
-             </div>
+
+             <AnimatePresence mode="wait">
+               {isVaultLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="py-32 flex flex-col items-center justify-center gap-4 bg-white border border-slate-200/50 rounded-[3rem]"
+                  >
+                     <div className="w-10 h-10 border-4 border-sky-100 border-t-sky-500 rounded-full animate-spin" />
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Syncing Knowledge</p>
+                  </motion.div>
+               ) : filteredVault.length > 0 ? (
+                  <motion.div
+                    key="list"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6"
+                  >
+                     {filteredVault.map((item) => (
+                        <div key={item.id} className="bg-white border border-slate-200/50 rounded-[2rem] p-6 sm:p-8 hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500 group relative overflow-hidden">
+                           <div className="flex items-start justify-between mb-6 relative z-10">
+                              <div className="flex items-center gap-4">
+                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                   item.type === 'Quran' ? 'bg-sky-50 text-sky-600' :
+                                   item.type === 'Hadith' ? 'bg-amber-50 text-amber-600' :
+                                   item.type === 'Dua' ? 'bg-emerald-50 text-emerald-600' :
+                                   item.type === 'Knowledge' ? 'bg-purple-50 text-purple-600' :
+                                   'bg-rose-50 text-rose-600'
+                                 }`}>
+                                    {item.type === 'Quran' ? <BookOpen className="w-4 h-4" /> :
+                                     item.type === 'Hadith' ? <Star className="w-4 h-4" /> :
+                                     item.type === 'Dua' ? <MessageCircle className="w-4 h-4" /> :
+                                     item.type === 'Knowledge' ? <Brain className="w-4 h-4" /> :
+                                     <History className="w-4 h-4" />}
+                                 </div>
+                                 <div>
+                                    <h4 className="text-base sm:text-lg font-black text-slate-900 leading-tight mb-1">{item.title}</h4>
+                                    <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">{item.detail}</p>
+                                 </div>
+                              </div>
+                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest pt-1">
+                                {new Date(item.date).toLocaleDateString()}
+                              </p>
+                           </div>
+
+                           {item.content && (
+                              <div className="p-5 sm:p-6 bg-slate-50 rounded-2xl border border-slate-100 relative z-10 mt-2 hover:bg-white hover:border-sky-100 transition-all duration-300">
+                                 <p className="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed italic">
+                                    "{item.content}"
+                                 </p>
+                              </div>
+                           )}
+
+                           <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full blur-[60px] -mr-16 -mt-16 pointer-events-none transition-opacity group-hover:opacity-100" />
+                        </div>
+                     ))}
+                     {hasMore && !searchQuery && (
+                        <div className="md:col-span-2 pt-10 flex justify-center">
+                           <button 
+                             onClick={() => setPage(p => p + 1)}
+                             disabled={isVaultLoading}
+                             className="group relative px-8 py-3 bg-white border border-slate-200 rounded-2xl flex items-center gap-3 hover:border-sky-500 hover:shadow-xl hover:shadow-slate-200/40 transition-all active:scale-95 disabled:opacity-50"
+                           >
+                              {isVaultLoading ? (
+                                <Loader2 className="w-4 h-4 text-sky-500 animate-spin" />
+                              ) : (
+                                <Zap className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
+                              )}
+                              <span className="text-xs font-black uppercase tracking-widest text-slate-900 leading-none">Experience More History</span>
+                           </button>
+                        </div>
+                     )}
+                  </motion.div>
+               ) : (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-white border border-slate-200/50 rounded-[3rem] p-12 sm:p-32 flex flex-col items-center justify-center text-center shadow-sm"
+                  >
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mb-6">
+                       <Library className="w-8 h-8 sm:w-10 sm:h-10 text-slate-200" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-2">No data found</h3>
+                    <p className="text-slate-400 font-bold text-xs sm:text-sm max-w-xs leading-relaxed">
+                       {searchQuery ? "Try a different search term." : `You haven't added any ${activeNav === 'journal' ? 'reflections' : 'records'} yet.`}
+                    </p>
+                     {activeNav === "journal" && !searchQuery && (
+                        <Link href="/entry" className="mt-8 flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-slate-900/10 hover:scale-105 active:scale-95 transition-all">
+                           <Plus className="w-3.5 h-3.5" /> Start Journaling
+                        </Link>
+                     )}
+                  </motion.div>
+               )}
+             </AnimatePresence>
           </div>
         );
       default:
@@ -328,7 +505,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex overflow-hidden">
+    <>
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex overflow-hidden">
       
       {/* SIDEBAR (Desktop) */}
       <aside className="hidden lg:flex w-72 bg-white border-r border-slate-200/60 flex-col sticky top-0 h-screen z-40">
@@ -421,5 +599,40 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+
+    <AnimatePresence>
+      {showMilestone && (
+        <>
+          <Confetti />
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] flex items-center justify-center p-6 animate-in fade-in duration-500">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[3rem] p-10 sm:p-14 max-w-lg w-full shadow-2xl relative overflow-hidden text-center"
+            >
+              <div className="bg-sky-500 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-sky-500/20 rotate-3">
+                <Zap className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 leading-tight mb-4 tracking-tighter">
+                Unstoppable Discipline.
+              </h2>
+              <p className="text-slate-500 font-bold leading-relaxed mb-10">
+                You've logged **{data.todayCount} entries** today. Your consistency is building a powerful spiritual trajectory. Keep pressing forward.
+              </p>
+              <button 
+                onClick={() => setShowMilestone(false)}
+                className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all"
+              >
+                Continue the Journey
+              </button>
+              
+              <div className="absolute top-0 right-0 w-32 h-32 bg-sky-50 rounded-full blur-[60px] -mr-16 -mt-16 pointer-events-none" />
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
